@@ -174,7 +174,7 @@ namespace TMS.WebApp.Controllers
                 CreatedByName = ticket.CreatedByName,
                 CreatedByUserId = ticket.CreatedBy,
                 Comments = dal.GetComments(id),
-                Activities = dal.GetActivities(id),
+                Activities = IsEmployee ? null : dal.GetActivities(id),
                 Attachments = dal.GetAttachments(id)
             };
 

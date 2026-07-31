@@ -68,14 +68,33 @@
                                 </td>
                                 <td>@u.DepartmentName</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm" role="group" aria-label="Approval">
-                                        <input type="radio" class="btn-check approval-radio" name="approval_@u.UserId" id="rejected_@u.UserId" value="rejected" data-userid="@u.UserId" @(u.IsApproved == 0 ? "checked" : "") />
-                                        <label class="btn btn-outline-danger" for="rejected_@u.UserId">Rejected</label>
-                                        <input type="radio" class="btn-check approval-radio" name="approval_@u.UserId" id="awaiting_@u.UserId" value="awaiting" data-userid="@u.UserId" @(u.IsApproved == null ? "checked" : "") />
-                                        <label class="btn btn-outline-warning" for="awaiting_@u.UserId">Awaiting</label>
-                                        <input type="radio" class="btn-check approval-radio" name="approval_@u.UserId" id="approved_@u.UserId" value="approved" data-userid="@u.UserId" @(u.IsApproved == 1 ? "checked" : "") />
-                                        <label class="btn btn-outline-success" for="approved_@u.UserId">Approved</label>
-                                    </div>
+                                    @if (u.UserId == (int)ViewBag.CurrentUserId)
+                                    {
+                                        if (u.IsApproved == 0)
+                                        {
+                                            <span class="badge bg-danger">Rejected</span>
+                                        }
+                                        else if (u.IsApproved == 1)
+                                        {
+                                            <span class="badge bg-success">Approved</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Awaiting</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="approval-seg" data-userid="@u.UserId">
+                                            <input type="radio" class="approval-radio rejected" name="approval_@u.UserId" id="rejected_@u.UserId" value="rejected" @(u.IsApproved == 0 ? "checked" : "") />
+                                            <label for="rejected_@u.UserId">Rejected</label>
+                                            <input type="radio" class="approval-radio awaiting" name="approval_@u.UserId" id="awaiting_@u.UserId" value="awaiting" @(u.IsApproved == null ? "checked" : "") />
+                                            <label for="awaiting_@u.UserId">Awaiting</label>
+                                            <input type="radio" class="approval-radio approved" name="approval_@u.UserId" id="approved_@u.UserId" value="approved" @(u.IsApproved == 1 ? "checked" : "") />
+                                            <label for="approved_@u.UserId">Approved</label>
+                                            <span class="approval-slider"></span>
+                                        </div>
+                                    }
                                 </td>
                                 <td>@u.CreatedOn.ToString("dd MMM yyyy")</td>
                                 <td>
@@ -130,16 +149,28 @@
                 $(this).data('orig', $(this).val());
             });
 
+            $('.approval-seg').each(function () {
+                $(this).data('orig', $(this).find('input:checked').val());
+            });
+
             $('.approval-radio').change(function () {
-                var radio = $(this);
-                var userId = radio.data('userid');
-                var approval = radio.val();
+                var seg = $(this).closest('.approval-seg');
+                var userId = seg.data('userid');
+                var approval = $(this).val();
                 $.post('@Url.Action("SetApproval", "User")', { userId: userId, approval: approval, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
                     .done(function (r) {
-                        if (r.success) { showToast(r.message, 'success'); }
-                        else { showToast(r.error, 'error'); }
+                        if (r.success) {
+                            seg.data('orig', approval);
+                            showToast(r.message, 'success');
+                        } else {
+                            showToast(r.error, 'error');
+                            seg.find('input[value="' + seg.data('orig') + '"]').prop('checked', true);
+                        }
                     })
-                    .fail(function () { showToast('Error updating approval', 'error'); });
+                    .fail(function () {
+                        showToast('Error updating approval', 'error');
+                        seg.find('input[value="' + seg.data('orig') + '"]').prop('checked', true);
+                    });
             });
 
             $('.delete-user').click(function () {

@@ -3,6 +3,7 @@
     ViewBag.Title = "Ticket " + Model.TicketNumber;
     bool isAdmin = (bool)ViewBag.IsAdmin;
     bool isSupport = (bool)ViewBag.IsSupport;
+    bool isEmployee = !(isAdmin || isSupport);
     bool isOwner = Model.CreatedByUserId == (int)ViewBag.CurrentUserId;
     bool canEdit = isAdmin || (isOwner && !Model.AssignedToUserId.HasValue);
     bool canDelete = isAdmin || (isOwner && !Model.AssignedToUserId.HasValue);
@@ -76,39 +77,50 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white d-flex justify-content-between">
-                <h6 class="mb-0">Activity Log</h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    @if (Model.Activities != null && Model.Activities.Any())
-                    {
-                        foreach (var a in Model.Activities)
+        @if (!isEmployee)
+        {
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white d-flex justify-content-between">
+                    <h6 class="mb-0">Activity Log</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @if (Model.Activities != null && Model.Activities.Any())
                         {
-                            <div class="list-group-item">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <small class="fw-bold">@a.ActivityTypeName</small>
-                                    <small class="text-muted">@a.CreatedOn.ToString("dd MMM yyyy HH:mm") by @a.CreatedByName</small>
+                            foreach (var a in Model.Activities)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <small class="fw-bold">@a.ActivityTypeName</small>
+                                        <small class="text-muted">@a.CreatedOn.ToString("dd MMM yyyy HH:mm") by @a.CreatedByName</small>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(a.Remarks))
+                                    {
+                                        <p class="mb-0 small">@a.Remarks</p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(a.OldValue) && !string.IsNullOrEmpty(a.NewValue))
+                                    {
+                                        <p class="mb-0 small text-muted">@a.OldValue &rarr; @a.NewValue</p>
+                                    }
+                                    else if (!string.IsNullOrEmpty(a.NewValue))
+                                    {
+                                        <p class="mb-0 small text-muted">@a.NewValue</p>
+                                    }
+                                    else if (!string.IsNullOrEmpty(a.OldValue))
+                                    {
+                                        <p class="mb-0 small text-muted">@a.OldValue</p>
+                                    }
                                 </div>
-                                @if (!string.IsNullOrEmpty(a.Remarks))
-                                {
-                                    <p class="mb-0 small">@a.Remarks</p>
-                                }
-                                @if (!string.IsNullOrEmpty(a.OldValue) || !string.IsNullOrEmpty(a.NewValue))
-                                {
-                                    <p class="mb-0 small text-muted">@a.OldValue → @a.NewValue</p>
-                                }
-                            </div>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <div class="list-group-item text-muted text-center">No activity recorded.</div>
-                    }
+                        else
+                        {
+                            <div class="list-group-item text-muted text-center">No activity recorded.</div>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 
     <div class="col-md-4">
