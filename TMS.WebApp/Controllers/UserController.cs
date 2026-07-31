@@ -191,21 +191,62 @@ namespace TMS.WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult SetApproval(int userId, bool isApproved)
+        public JsonResult SetApproval(int userId, string approval)
         {
             if (userId == CurrentUserId)
             {
                 return Json(new { success = false, error = "You cannot change your own approval status." });
             }
 
+            byte? isApproved;
+            string message;
+            switch (approval)
+            {
+                case "approved":
+                    isApproved = 1;
+                    message = "User approved successfully. They can now log in.";
+                    break;
+                case "rejected":
+                    isApproved = 0;
+                    message = "User rejected successfully.";
+                    break;
+                case "awaiting":
+                    isApproved = null;
+                    message = "User set to awaiting approval.";
+                    break;
+                default:
+                    return Json(new { success = false, error = "Invalid approval status." });
+            }
+
             try
             {
                 new UserDAL().SetUserApproval(userId, isApproved, CurrentUserId);
-                return Json(new { success = true, message = isApproved ? "User approved successfully." : "User rejected successfully." });
+                return Json(new { success = true, message = message });
             }
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "Error setting user approval");
+                return Json(new { success = false, error = "An error occurred." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult Delete(int userId)
+        {
+            if (userId == CurrentUserId)
+            {
+                return Json(new { success = false, error = "You cannot delete your own account." });
+            }
+
+            try
+            {
+                new UserDAL().DeleteUser(userId, CurrentUserId);
+                return Json(new { success = true, message = "User deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error deleting user");
                 return Json(new { success = false, error = "An error occurred." });
             }
         }

@@ -160,11 +160,11 @@ namespace TMS.DataAccess.DAL
             }
         }
 
-        public void SetUserApproval(int userId, bool isApproved, int modifiedBy)
+        public void SetUserApproval(int userId, byte? isApproved, int modifiedBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsUserSetApproval");
             db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
-            db.AddInParameter(cmd, "@IsApproved", DbType.Boolean, isApproved);
+            db.AddInParameter(cmd, "@IsApproved", DbType.Byte, isApproved ?? (object)DBNull.Value);
             db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
             try
             {
@@ -173,6 +173,22 @@ namespace TMS.DataAccess.DAL
             catch (Exception ex)
             {
                 Log.Error(ex, "Error in SetUserApproval");
+                throw;
+            }
+        }
+
+        public void DeleteUser(int userId, int modifiedBy)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("tmsUserDelete");
+            db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in DeleteUser");
                 throw;
             }
         }

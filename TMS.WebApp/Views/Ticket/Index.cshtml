@@ -3,6 +3,8 @@
     ViewBag.Title = "Tickets";
     bool isAdmin = (bool)ViewBag.IsAdmin;
     bool isSupport = (bool)ViewBag.IsSupport;
+    bool isEmployee = (bool)ViewBag.IsEmployee;
+    int currentUserId = (int)ViewBag.CurrentUserId;
     bool myAssignedOnly = (bool)ViewBag.MyAssignedOnly;
 }
 @Html.AntiForgeryToken()
@@ -14,7 +16,7 @@
         {
             <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> All Tickets</a>
         }
-        else if (isSupport || isAdmin)
+        else if (isSupport)
         {
             <a href="@Url.Action("MyAssigned")" class="btn btn-outline-primary"><i class="bi bi-person-check"></i> My Assigned Tickets</a>
         }
@@ -54,14 +56,23 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Ticket #</th>
+                        <th>Ticket</th>
                         <th>Title</th>
                         <th>Category</th>
-                        <th>Priority</th>
+                        @if (!isEmployee)
+                        {
+                            <th>Priority</th>
+                        }
                         <th>Status</th>
-                        <th>Created By</th>
+                        @if (!isEmployee)
+                        {
+                            <th>Created By</th>
+                        }
                         <th>Assigned To</th>
-                        <th>Messages</th>
+                        @if (!isEmployee)
+                        {
+                            <th>Messages</th>
+                        }
                         <th>Created</th>
                         <th></th>
                     </tr>
@@ -75,9 +86,15 @@
                                 <td><a href="@Url.Action("Details", new { id = t.TicketId })">@t.TicketNumber</a></td>
                                 <td>@t.Title</td>
                                 <td>@t.CategoryName</td>
-                                <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span></td>
+                                @if (!isEmployee)
+                                {
+                                    <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span></td>
+                                }
                                 <td><span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span></td>
-                                <td>@t.CreatedByName</td>
+                                @if (!isEmployee)
+                                {
+                                    <td>@t.CreatedByName</td>
+                                }
                                 <td>
                                     @if (isAdmin)
                                     {
@@ -94,17 +111,24 @@
                                         @(t.AssignedToName ?? "-")
                                     }
                                 </td>
-                                <td><span class="badge bg-light text-dark">@t.ConversationCount</span></td>
+                                @if (!isEmployee)
+                                {
+                                    <td><span class="badge bg-light text-dark">@t.ConversationCount</span></td>
+                                }
                                 <td>@t.CreatedOn.ToString("dd MMM yyyy")</td>
                                 <td>
                                     <a href="@Url.Action("Details", new { id = t.TicketId })" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                    @if (isAdmin || (isEmployee && t.CreatedBy == currentUserId && !t.AssignedToUserId.HasValue))
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-ticket" data-ticketid="@t.TicketId" data-title="@t.Title"><i class="bi bi-trash"></i></button>
+                                    }
                                 </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="10" class="text-center text-muted py-4">No tickets found.@(!(bool)ViewBag.IsSupport ? " <a href=\"" + Url.Action("Create") + "\">Raise a ticket</a>" : "")</td></tr>
+                        <tr><td colspan="@(isEmployee ? 7 : 10)" class="text-center text-muted py-4">No tickets found.@(!(bool)ViewBag.IsSupport ? " <a href=\"" + Url.Action("Create") + "\">Raise a ticket</a>" : "")</td></tr>
                     }
                 </tbody>
             </table>
@@ -147,6 +171,24 @@
                     .fail(function () { showToast('Error assigning ticket', 'error'); sel.val(sel.data('orig')); });
             }).each(function () {
                 $(this).data('orig', $(this).val());
+            });
+
+            $('.delete-ticket').click(function () {
+                var btn = $(this);
+                var ticketId = btn.data('ticketid');
+                var title = btn.data('title');
+                showConfirm('Delete Ticket', 'Are you sure you want to delete ticket "' + title + '"? This cannot be undone.', 'Delete', function () {
+                    $.post('@Url.Action("Delete", "Ticket")', { id: ticketId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
+                        .done(function (r) {
+                            if (r.success) {
+                                showToast(r.message, 'success');
+                                setTimeout(function () { window.location.reload(); }, 800);
+                            } else {
+                                showToast(r.message || 'Error deleting ticket', 'error');
+                            }
+                        })
+                        .fail(function () { showToast('Error deleting ticket', 'error'); });
+                });
             });
         });
     </script>

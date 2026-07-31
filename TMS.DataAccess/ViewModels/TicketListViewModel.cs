@@ -29,6 +29,7 @@ namespace TMS.DataAccess.ViewModels
         public string PriorityName { get; set; }
         public string StatusName { get; set; }
         public string CreatedByName { get; set; }
+        public int CreatedBy { get; set; }
         public int? AssignedToUserId { get; set; }
         public string AssignedToName { get; set; }
         public DateTime CreatedOn { get; set; }

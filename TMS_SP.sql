@@ -492,7 +492,7 @@ BEGIN
 			AND (@DateTo IS NULL OR t.CreatedOn <= @DateTo)
 			AND (@UserRole IN ('Admin', 'Support') OR @UserId IS NULL OR t.CreatedBy = @UserId OR t.assignedToUserId = @UserId);
 
-		SELECT t.ticketId, t.ticketNumber, t.title, t.assignedToUserId,
+		SELECT t.ticketId, t.ticketNumber, t.title, t.assignedToUserId, t.CreatedBy AS createdByUserId,
 			c.categoryName, p.priorityName, s.statusName,
 			u.fullName AS createdByName, assignee.fullName AS assignedToName,
 			t.CreatedOn,
@@ -1052,12 +1052,57 @@ GO
 -- 34b. tmsUserSetApproval (Admin approves/rejects a self-registered user)
 -- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserSetApproval
-	@UserId INT, @IsApproved BIT, @ModifiedBy INT
+	@UserId INT, @IsApproved TINYINT = NULL, @ModifiedBy INT
 AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		UPDATE tmsCredential SET isApproved = @IsApproved, ModifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
+		WHERE userId = @UserId;
+	END TRY
+	BEGIN CATCH
+		THROW;
+	END CATCH;
+END;
+GO
+
+-- ================================================================
+-- 34c. tmsUserDelete (Admin soft-deletes a user; last active admin is protected)
+-- ================================================================
+CREATE OR ALTER PROCEDURE tmsUserDelete
+	@UserId INT, @ModifiedBy INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	BEGIN TRY
+		IF @UserId = @ModifiedBy
+		BEGIN
+			THROW 51006, 'You cannot delete your own account.', 1;
+		END;
+
+		DECLARE @TargetRoleId INT;
+		SELECT @TargetRoleId = c.roleId FROM tmsCredential c WHERE c.userId = @UserId;
+
+		IF @TargetRoleId = (SELECT roleId FROM tmsRole WHERE roleName = 'Administrator')
+		BEGIN
+			DECLARE @ActiveAdminCount INT;
+			SELECT @ActiveAdminCount = COUNT(*)
+			FROM tmsUser u
+			INNER JOIN tmsCredential c ON u.userId = c.userId
+			WHERE c.roleId = @TargetRoleId AND u.IsActive = 1;
+			IF @ActiveAdminCount <= 1
+			BEGIN
+				THROW 51007, 'Cannot delete the last active Administrator.', 1;
+			END;
+		END;
+
+		UPDATE tmsTicket SET assignedToUserId = NULL, modifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
+		WHERE assignedToUserId = @UserId;
+
+		UPDATE tmsCredential SET IsActive = 0, ModifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
+		WHERE userId = @UserId;
+
+		UPDATE tmsUser SET IsActive = 0, modifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
 		WHERE userId = @UserId;
 	END TRY
 	BEGIN CATCH
@@ -1288,7 +1333,7 @@ BEGIN
 			INNER JOIN tmsPriority p ON t.priorityId = p.priorityId
 			INNER JOIN tmsUser u ON t.CreatedBy = u.userId
 			LEFT JOIN tmsUser assignee ON t.assignedToUserId = assignee.userId
-			WHERE t.IsActive = 1
+			WHERE t.IsActive = 1 AND t.assignedToUserId IS NULL
 			ORDER BY t.CreatedOn DESC;
 		END
 		ELSE IF @RoleName = 'Support'

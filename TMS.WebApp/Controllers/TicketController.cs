@@ -55,6 +55,8 @@ namespace TMS.WebApp.Controllers
             ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name");
             ViewBag.IsSupport = IsSupport;
             ViewBag.IsAdmin = IsAdmin;
+            ViewBag.IsEmployee = IsEmployee;
+            ViewBag.CurrentUserId = CurrentUserId;
             ViewBag.MyAssignedOnly = myAssignedOnly;
 
             return View("Index", vm);
@@ -207,10 +209,19 @@ namespace TMS.WebApp.Controllers
                     return RedirectToAction("Index");
                 }
 
-                if (IsEmployee && current.CreatedBy != CurrentUserId)
+                if (IsEmployee)
                 {
-                    TempData["info"] = "You can only edit your own tickets.";
-                    return RedirectToAction("Details", new { id = vm.TicketId });
+                    if (current.CreatedBy != CurrentUserId)
+                    {
+                        TempData["info"] = "You can only edit your own tickets.";
+                        return RedirectToAction("Details", new { id = vm.TicketId });
+                    }
+
+                    if (current.AssignedToUserId.HasValue)
+                    {
+                        TempData["info"] = "You cannot edit a ticket once it has been assigned.";
+                        return RedirectToAction("Details", new { id = vm.TicketId });
+                    }
                 }
 
                 dal.UpdateTicket(vm.TicketId, vm.Title, vm.Description, vm.CategoryId, vm.PriorityId, current.StatusId, current.AssignedToUserId, CurrentUserId);
@@ -422,23 +433,44 @@ namespace TMS.WebApp.Controllers
             return RedirectToAction("Details", new { id = ticketId });
         }
 
-        [AuthorizeRole(Role.Administrator)]
+        [AuthorizeRole(Role.Administrator, Role.Employee)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id)
         {
+            string message;
+            bool success = false;
             try
             {
                 TicketDAL dal = new TicketDAL();
-                dal.DeleteTicket(id, CurrentUserId);
-                TempData["info"] = "Ticket deleted.";
+                var ticket = dal.GetTicketById(id);
+                if (ticket == null)
+                {
+                    message = "Ticket not found.";
+                }
+                else if (IsEmployee && (ticket.CreatedBy != CurrentUserId || ticket.AssignedToUserId.HasValue))
+                {
+                    message = "You can only delete your own tickets before they are assigned.";
+                }
+                else
+                {
+                    dal.DeleteTicket(id, CurrentUserId);
+                    success = true;
+                    message = "Ticket deleted.";
+                }
             }
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "Error deleting ticket");
-                TempData["info"] = "Error deleting ticket.";
+                message = "Error deleting ticket.";
             }
 
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = success, message = message });
+            }
+
+            TempData["info"] = message;
             return RedirectToAction("Index");
         }
 

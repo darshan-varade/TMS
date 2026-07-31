@@ -77,6 +77,7 @@ namespace TMS.DataAccess.DAL
                             PriorityName = reader["priorityName"].ToString(),
                             StatusName = reader["statusName"].ToString(),
                             CreatedByName = reader["createdByName"].ToString(),
+                            CreatedBy = Convert.ToInt32(reader["createdByUserId"]),
                             AssignedToUserId = reader["assignedToUserId"] != DBNull.Value ? Convert.ToInt32(reader["assignedToUserId"]) : (int?)null,
                             AssignedToName = reader["assignedToName"] != DBNull.Value ? reader["assignedToName"].ToString() : null,
                             CreatedOn = Convert.ToDateTime(reader["CreatedOn"]),

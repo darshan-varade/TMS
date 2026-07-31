@@ -13,7 +13,10 @@ namespace TMS.WebApp.Controllers
             var vm = dal.GetDashboardData(CurrentUserId, role);
             vm.StatusChart = dal.GetStatusChartData(CurrentUserId, role);
             vm.PriorityChart = dal.GetPriorityChartData(CurrentUserId, role);
-            vm.RecentTickets = dal.GetRecentTickets(CurrentUserId, role, 5);
+            if (role == "Admin")
+            {
+                vm.RecentTickets = dal.GetRecentTickets(CurrentUserId, role, 5);
+            }
             return View(vm);
         }
     }

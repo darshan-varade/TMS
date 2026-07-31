@@ -67,13 +67,15 @@
         </div>
     </div>
 
-    <div class="row mt-3">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Recent Tickets</h6>
-                    <a href="@Url.Action("Index", "Ticket")" class="btn btn-sm btn-outline-primary">View All</a>
-                </div>
+    @if (User.IsInRole("Administrator"))
+    {
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Unassigned Tickets</h6>
+                        <a href="@Url.Action("Index", "Ticket")" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
@@ -115,6 +117,7 @@
             </div>
         </div>
     </div>
+    }
 </div>
 
 @section scripts {
