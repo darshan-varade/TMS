@@ -1,0 +1,33 @@
+@model TMS.DataAccess.ViewModels.TicketStatusUpdateViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Update Status - @Model.TicketNumber</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+@using (Html.BeginForm("UpdateStatus", "Ticket", FormMethod.Post, new { id = "statusForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.TicketId)
+
+    <div class="modal-body">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="mb-3">
+            @Html.LabelFor(m => m.StatusId, new { @class = "form-label" }) <span class="text-danger">*</span>
+            @Html.DropDownListFor(m => m.StatusId, new SelectList(Model.Statuses ?? new List<TMS.DataAccess.ViewModels.DropdownViewModel>(), "Id", "Name"), "-- Select Status --", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.StatusId, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(m => m.PriorityId, new { @class = "form-label" }) <span class="text-danger">*</span>
+            @Html.DropDownListFor(m => m.PriorityId, new SelectList(Model.Priorities ?? new List<TMS.DataAccess.ViewModels.DropdownViewModel>(), "Id", "Name"), "-- Select Priority --", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.PriorityId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Update</button>
+    </div>
+}

@@ -1,0 +1,237 @@
+@model TMS.DataAccess.ViewModels.TicketDetailViewModel
+@{
+    ViewBag.Title = "Ticket " + Model.TicketNumber;
+    bool isAdmin = (bool)ViewBag.IsAdmin;
+    bool isSupport = (bool)ViewBag.IsSupport;
+    bool isOwner = Model.CreatedByUserId == (int)ViewBag.CurrentUserId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Ticket @Model.TicketNumber</h4>
+    <div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+        @if (isAdmin)
+        {
+            <button type="button" class="btn btn-outline-success" data-action="assign" data-ticket-id="@Model.TicketId"><i class="bi bi-person-check"></i> Assign</button>
+        }
+        @if (isAdmin || isSupport)
+        {
+            <button type="button" class="btn btn-outline-primary" data-action="updatestatus" data-ticket-id="@Model.TicketId"><i class="bi bi-arrow-repeat"></i> Update Status</button>
+        }
+        @if (isAdmin || isOwner)
+        {
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editTicketModal"><i class="bi bi-pencil"></i> Edit</button>
+        }
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h5>@Model.Title</h5>
+                <p class="text-muted">@Model.Description</p>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-secondary">@Model.CategoryName</span>
+                    <span class="badge @(Model.PriorityName == "Critical" ? "bg-danger" : Model.PriorityName == "High" ? "bg-warning" : Model.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@Model.PriorityName</span>
+                    <span class="badge @(Model.StatusName == "Closed" ? "bg-success" : Model.StatusName == "Resolved" ? "bg-info" : Model.StatusName == "In Progress" ? "bg-primary" : Model.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@Model.StatusName</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white"><h6 class="mb-0">Conversation (@(Model.Comments != null ? Model.Comments.Count : 0))</h6></div>
+            <div class="card-body">
+                @if (Model.Comments != null && Model.Comments.Any())
+                {
+                    foreach (var c in Model.Comments.Where(c => !(c.IsInternal && !(isAdmin || isSupport))))
+                    {
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <strong>@c.CreatedByName</strong>
+                                <small class="text-muted">@c.CreatedOn.ToString("dd MMM yyyy HH:mm")</small>
+                            </div>
+                            <p class="mb-0 mt-1">@c.Comment</p>
+                            @if (c.IsInternal)
+                            {
+                                <span class="badge bg-warning text-dark mt-1">Internal Note</span>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No comments yet.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white d-flex justify-content-between">
+                <h6 class="mb-0">Activity Log</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @if (Model.Activities != null && Model.Activities.Any())
+                    {
+                        foreach (var a in Model.Activities)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <small class="fw-bold">@a.ActivityTypeName</small>
+                                    <small class="text-muted">@a.CreatedOn.ToString("dd MMM yyyy HH:mm") by @a.CreatedByName</small>
+                                </div>
+                                @if (!string.IsNullOrEmpty(a.Remarks))
+                                {
+                                    <p class="mb-0 small">@a.Remarks</p>
+                                }
+                                @if (!string.IsNullOrEmpty(a.OldValue) || !string.IsNullOrEmpty(a.NewValue))
+                                {
+                                    <p class="mb-0 small text-muted">@a.OldValue → @a.NewValue</p>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="list-group-item text-muted text-center">No activity recorded.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white"><h6 class="mb-0">Details</h6></div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr><th>Created By</th><td>@Model.CreatedByName</td></tr>
+                    <tr><th>Assigned To</th><td>@(Model.AssignedToName ?? "Unassigned")</td></tr>
+                    <tr><th>Due Date</th><td>@Model.DueDate.ToString("dd MMM yyyy HH:mm")</td></tr>
+                    @if (Model.ResolvedOn.HasValue)
+                    {
+                        <tr><th>Resolved On</th><td>@Model.ResolvedOn.Value.ToString("dd MMM yyyy HH:mm")</td></tr>
+                    }
+                    <tr><th>Created</th><td>@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white"><h6 class="mb-0">Attachments</h6></div>
+            <div class="card-body">
+                @if (Model.Attachments != null && Model.Attachments.Any())
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var att in Model.Attachments)
+                        {
+                            <li><a href="@Url.Action("DownloadFile", "Ticket", new { fileName = att.StoredFileName })" target="_blank"><i class="bi bi-paperclip"></i> @att.OriginalFileName</a> <small class="text-muted">(@(att.FileSize / 1024) KB)</small></li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No attachments.</p>
+                }
+                <hr />
+                @using (Html.BeginForm("UploadAttachment", "Ticket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <input type="file" name="file" class="form-control form-control-sm mb-2" />
+                    <button type="submit" class="btn btn-sm btn-outline-primary w-100">Upload</button>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0">Add Comment</h6></div>
+            <div class="card-body">
+                <form method="post" action="@Url.Action("AddComment", "Ticket")" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <div class="mb-2">
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Type your comment..."></textarea>
+                    </div>
+                    @if (isAdmin || isSupport)
+                    {
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="isInternal" value="true" class="form-check-input" id="isInternal" />
+                            <label class="form-check-label small" for="isInternal">Internal note (hidden from employee)</label>
+                        </div>
+                    }
+                    <div class="mb-2">
+                        <input type="file" name="file" class="form-control form-control-sm" />
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Post Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (isAdmin || isOwner)
+{
+    <div class="modal fade" id="editTicketModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                @using (Html.BeginForm("Update", "Ticket", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="TicketId" value="@Model.TicketId" />
+                    <input type="hidden" name="TicketNumber" value="@Model.TicketNumber" />
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Ticket @Model.TicketNumber</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" name="Title" class="form-control" value="@Model.Title" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="Description" class="form-control" rows="4" required>@Model.Description</textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Category</label>
+                                <select name="CategoryId" class="form-select">
+                                    @foreach (var c in (SelectList)ViewBag.Categories)
+                                    {
+                                        <option value="@c.Value" @(c.Selected ? "selected" : "")>@c.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Priority</label>
+                                <select name="PriorityId" class="form-select">
+                                    @foreach (var p in (SelectList)ViewBag.Priorities)
+                                    {
+                                        <option value="@p.Value" @(p.Selected ? "selected" : "")>@p.Text</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="ticketActionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" id="ticketActionModalContent">
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/PageScripts/TicketDetailScript.js"></script>
+}

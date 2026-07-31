@@ -1,0 +1,72 @@
+@model TMS.DataAccess.ViewModels.UserAddViewModel
+@{
+    ViewBag.Title = "Add User";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Add User</h4>
+    <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        @using (Html.BeginForm("Create", "User", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.FullName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", placeholder = "Full name" })
+                    @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.MobileNumber, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.MobileNumber, new { @class = "form-control", placeholder = "Mobile number" })
+                    @Html.ValidationMessageFor(m => m.MobileNumber, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email address" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.RoleId, new { @class = "form-label" })
+                    <select name="RoleId" class="form-select">
+                        <option value="">-- Select Role --</option>
+                        @foreach (var r in Model.Roles)
+                        {
+                            <option value="@r.Id">@r.Name</option>
+                        }
+                    </select>
+                    @Html.ValidationMessageFor(m => m.RoleId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.DepartmentId, new { @class = "form-label" })
+                    <select name="DepartmentId" class="form-select">
+                        <option value="">-- Select Department --</option>
+                        @foreach (var d in Model.Departments)
+                        {
+                            <option value="@d.Id">@d.Name</option>
+                        }
+                    </select>
+                    @Html.ValidationMessageFor(m => m.DepartmentId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Create User</button>
+        }
+    </div>
+</div>

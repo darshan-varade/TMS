@@ -1,0 +1,147 @@
+@model TMS.DataAccess.ViewModels.DashboardViewModel
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p class="text-muted">Welcome back, @User.Identity.Name</p>
+    </div>
+
+    <div class="row g-3 mt-3">
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">Total Tickets</h5>
+                    <h2 class="mb-0">@Model.TotalTickets</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">Open</h5>
+                    <h2 class="mb-0 text-warning">@Model.OpenTickets</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">In Progress</h5>
+                    <h2 class="mb-0 text-primary">@Model.InProgressTickets</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-muted">Closed</h5>
+                    <h2 class="mb-0 text-success">@Model.ClosedTickets</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Tickets by Status</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Tickets by Priority</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="priorityChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Recent Tickets</h6>
+                    <a href="@Url.Action("Index", "Ticket")" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ticket #</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Created By</th>
+                                    <th>Assigned To</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentTickets != null && Model.RecentTickets.Any())
+                                {
+                                    foreach (var t in Model.RecentTickets)
+                                    {
+                                        <tr>
+                                            <td><a href="@Url.Action("Details", "Ticket", new { id = t.TicketId })">@t.TicketNumber</a></td>
+                                            <td>@t.Title</td>
+                                            <td><span class="badge bg-info">@t.StatusName</span></td>
+                                            <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : "bg-secondary")">@t.PriorityName</span></td>
+                                            <td>@t.CreatedByName</td>
+                                            <td>@(t.AssignedToName ?? "-")</td>
+                                            <td>@t.CreatedOn.ToString("dd MMM yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="7" class="text-center text-muted py-3">No tickets found</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        var statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
+                    backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#6c757d', '#dc3545']
+                }]
+            }
+        });
+
+        var priorityCtx = document.getElementById('priorityChart').getContext('2d');
+        new Chart(priorityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.PriorityChart.Select(s => $"'{s.Label}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.PriorityChart.Select(s => s.Value.ToString()))],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6f42c1']
+                }]
+            }
+        });
+    </script>
+}

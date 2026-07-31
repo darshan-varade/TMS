@@ -1,0 +1,80 @@
+@model TMS.DataAccess.ViewModels.ProfileViewModel
+@{
+    ViewBag.Title = "My Profile";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">My Profile</h4>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0">Profile Information</h6></div>
+            <div class="card-body">
+                @using (Html.BeginForm("Update", "Profile", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control" value="@Model.Email" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.FullName, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.FullName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.MobileNumber, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.MobileNumber, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.MobileNumber, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Department</label>
+                        <input type="text" class="form-control" value="@Model.DepartmentName" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <input type="text" class="form-control" value="@Model.RoleName" readonly />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Update Profile</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0">Change Password</h6></div>
+            <div class="card-body">
+                @using (Html.BeginForm("ChangePassword", "Profile", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="CurrentPassword" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="NewPassword" class="form-control" required minlength="6" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="ConfirmPassword" class="form-control" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-warning"><i class="bi bi-key"></i> Change Password</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
