@@ -1,0 +1,37 @@
+﻿{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start IIS Express",
+            "type": "process",
+            "command": "C:\\Program Files\\IIS Express\\iisexpress.exe",
+            "args": [
+                "/path:D:\\TMSv3\\TMS\\TMS.WebApp",
+                "/port:5000",
+                "/clr:v4.0"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*IIS Express.*running.*$",
+                    "endsPattern": "^.*Press Ctrl.*$"
+                }
+            }
+        },
+        {
+            "label": "Stop IIS Express",
+            "type": "process",
+            "command": "taskkill",
+            "args": ["/f", "/im", "iisexpress.exe"]
+        }
+    ]
+}

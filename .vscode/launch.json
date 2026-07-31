@@ -1,0 +1,14 @@
+﻿{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch IIS Express",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:5000",
+            "webRoot": "D:\\TMSv3\\TMS\\TMS.WebApp",
+            "preLaunchTask": "Start IIS Express",
+            "postDebugTask": "Stop IIS Express"
+        }
+    ]
+}

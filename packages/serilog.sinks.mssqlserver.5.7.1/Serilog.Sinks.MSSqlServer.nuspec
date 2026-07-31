@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Serilog.Sinks.MSSqlServer</id>
+    <version>5.7.1</version>
+    <authors>Michiel van Oudheusden,Christian Kadluba,Serilog Contributors</authors>
+    <license type="expression">Apache-2.0</license>
+    <licenseUrl>https://licenses.nuget.org/Apache-2.0</licenseUrl>
+    <icon>serilog-sink-nuget.png</icon>
+    <projectUrl>https://github.com/serilog-mssql/serilog-sinks-mssqlserver</projectUrl>
+    <description>A Serilog sink that writes events to Microsoft SQL Server</description>
+    <tags>serilog sinks mssqlserver</tags>
+    <repository type="git" url="https://github.com/serilog-mssql/serilog-sinks-mssqlserver" commit="4a80fd4b8e9feeca79dde0370436e8a0227d0cca" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.2">
+        <dependency id="Serilog" version="2.5.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.PeriodicBatching" version="2.3.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETFramework4.6.2">
+        <dependency id="Microsoft.Data.SqlClient" version="1.1.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog" version="2.5.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.PeriodicBatching" version="2.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETFramework4.7.2">
+        <dependency id="Microsoft.Azure.Services.AppAuthentication" version="1.4.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Data.SqlClient" version="1.1.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog" version="2.5.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.PeriodicBatching" version="2.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="Microsoft.Azure.Services.AppAuthentication" version="1.4.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Data.SqlClient" version="1.1.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog" version="2.5.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.PeriodicBatching" version="2.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Microsoft.Data.SqlClient" version="1.1.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="2.0.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog" version="2.5.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.PeriodicBatching" version="2.3.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System.Configuration" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System.Data" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System.Data.Common" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.IO" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.Net.Http" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.Runtime" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.Security.Cryptography.Algorithms" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.Security.Cryptography.Encoding" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.Security.Cryptography.Primitives" targetFramework=".NETFramework4.7.2" />
+      <frameworkAssembly assemblyName="System.Security.Cryptography.X509Certificates" targetFramework=".NETFramework4.7.2" />
+    </frameworkAssemblies>
+  </metadata>
+</package>
