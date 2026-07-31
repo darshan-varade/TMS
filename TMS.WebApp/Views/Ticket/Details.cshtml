@@ -126,7 +126,7 @@
                     <ul class="list-unstyled mb-0">
                         @foreach (var att in Model.Attachments)
                         {
-                            <li><a href="@Url.Action("DownloadFile", "Ticket", new { fileName = att.StoredFileName })" target="_blank"><i class="bi bi-paperclip"></i> @att.OriginalFileName</a> <small class="text-muted">(@(att.FileSize / 1024) KB)</small></li>
+                            <li><a href="@Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId })" target="_blank"><i class="bi bi-paperclip"></i> @att.OriginalFileName</a> <small class="text-muted">(@(att.FileSize / 1024) KB)</small></li>
                         }
                     </ul>
                 }
@@ -171,66 +171,68 @@
     </div>
 </div>
 
-@if (isAdmin || isOwner)
-{
-    <div class="modal fade" id="editTicketModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                @using (Html.BeginForm("Update", "Ticket", FormMethod.Post))
-                {
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="TicketId" value="@Model.TicketId" />
-                    <input type="hidden" name="TicketNumber" value="@Model.TicketNumber" />
-                    <div class="modal-header">
-                        <h5 class="modal-title">Edit Ticket @Model.TicketNumber</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Title</label>
-                            <input type="text" name="Title" class="form-control" value="@Model.Title" required />
+@section modals {
+    @if (isAdmin || isOwner)
+    {
+        <div class="modal fade" id="editTicketModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    @using (Html.BeginForm("Update", "Ticket", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="TicketId" value="@Model.TicketId" />
+                        <input type="hidden" name="TicketNumber" value="@Model.TicketNumber" />
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Ticket @Model.TicketNumber</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="Description" class="form-control" rows="4" required>@Model.Description</textarea>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Category</label>
-                                <select name="CategoryId" class="form-select">
-                                    @foreach (var c in (SelectList)ViewBag.Categories)
-                                    {
-                                        <option value="@c.Value" @(c.Selected ? "selected" : "")>@c.Text</option>
-                                    }
-                                </select>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" name="Title" class="form-control" value="@Model.Title" required />
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Priority</label>
-                                <select name="PriorityId" class="form-select">
-                                    @foreach (var p in (SelectList)ViewBag.Priorities)
-                                    {
-                                        <option value="@p.Value" @(p.Selected ? "selected" : "")>@p.Text</option>
-                                    }
-                                </select>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea name="Description" class="form-control" rows="4" required>@Model.Description</textarea>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Category</label>
+                                    <select name="CategoryId" class="form-select">
+                                        @foreach (var c in (SelectList)ViewBag.Categories)
+                                        {
+                                            <option value="@c.Value" @(c.Selected ? "selected" : "")>@c.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Priority</label>
+                                    <select name="PriorityId" class="form-select">
+                                        @foreach (var p in (SelectList)ViewBag.Priorities)
+                                        {
+                                            <option value="@p.Value" @(p.Selected ? "selected" : "")>@p.Text</option>
+                                        }
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                }
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="modal fade" id="ticketActionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" id="ticketActionModalContent">
             </div>
         </div>
     </div>
 }
-
-<div class="modal fade" id="ticketActionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" id="ticketActionModalContent">
-        </div>
-    </div>
-</div>
 
 @section scripts {
     <script src="~/PageScripts/TicketDetailScript.js"></script>

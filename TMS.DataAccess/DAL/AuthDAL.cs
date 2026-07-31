@@ -139,6 +139,21 @@ namespace TMS.DataAccess.DAL
             }
         }
 
+        public void UpdateLastLogin(int userId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("tmsUserUpdateLastLogin");
+            db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in UpdateLastLogin");
+                throw;
+            }
+        }
+
         public int CreateRefreshToken(int userId, string hash, DateTime expiresAt)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsRefreshTokenCreate");
@@ -224,7 +239,7 @@ namespace TMS.DataAccess.DAL
 
         public DateTime? GetLatestOtpTimeByEmail(string email)
         {
-            DbCommand cmd = db.GetSqlStringCommand("SELECT MAX(CreatedOn) FROM tmsOtp WHERE emailId = @Email");
+            DbCommand cmd = db.GetStoredProcCommand("tmsOtpGetLatestTimeByEmail");
             db.AddInParameter(cmd, "@Email", DbType.String, email);
             try
             {

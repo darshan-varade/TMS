@@ -33,6 +33,7 @@ namespace TMS.WebApp.Infrastructure
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to send OTP email to {Email}", toEmail);
+                throw;
             }
 
             Log.Information("OTP for {Email}: {OtpCode}", toEmail, otpCode);

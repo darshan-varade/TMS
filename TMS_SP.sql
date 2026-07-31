@@ -102,6 +102,23 @@ END;
 GO
 
 -- ================================================================
+-- 4b. tmsUserUpdateLastLogin
+-- ================================================================
+CREATE OR ALTER PROCEDURE tmsUserUpdateLastLogin
+	@UserId INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	BEGIN TRY
+		UPDATE tmsCredential SET lastLogin = GETDATE() WHERE userId = @UserId;
+	END TRY
+	BEGIN CATCH
+		THROW;
+	END CATCH;
+END;
+GO
+
+-- ================================================================
 -- 5. tmsOtpCreateByEmail
 -- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpCreateByEmail
@@ -148,6 +165,23 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		UPDATE tmsOtp SET isUsed = 1 WHERE otpId = @OtpId;
+	END TRY
+	BEGIN CATCH
+		THROW;
+	END CATCH;
+END;
+GO
+
+-- ================================================================
+-- 7b. tmsOtpGetLatestTimeByEmail
+-- ================================================================
+CREATE OR ALTER PROCEDURE tmsOtpGetLatestTimeByEmail
+	@Email VARCHAR(100)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	BEGIN TRY
+		SELECT MAX(CreatedOn) AS LatestOtpTime FROM tmsOtp WHERE emailId = @Email;
 	END TRY
 	BEGIN CATCH
 		THROW;
@@ -507,8 +541,10 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		DECLARE @OldStatusId INT, @OldAssignedToUserId INT;
-		SELECT @OldStatusId = statusId, @OldAssignedToUserId = assignedToUserId FROM tmsTicket WHERE ticketId = @TicketId;
+		DECLARE @OldStatusId INT, @OldAssignedToUserId INT, @OldPriorityId INT, @OldCategoryId INT;
+		SELECT @OldStatusId = statusId, @OldAssignedToUserId = assignedToUserId,
+			@OldPriorityId = priorityId, @OldCategoryId = categoryId
+		FROM tmsTicket WHERE ticketId = @TicketId;
 
 		UPDATE tmsTicket
 		SET title = @Title, description = @Description, categoryId = ISNULL(@CategoryId, categoryId),
@@ -522,6 +558,22 @@ BEGIN
 			SELECT @OldStatusName = statusName FROM tmsStatus WHERE statusId = @OldStatusId;
 			SELECT @NewStatusName = statusName FROM tmsStatus WHERE statusId = @StatusId;
 			EXEC tmsTicketActivityCreate @TicketId, @ModifiedBy, 'Status Changed', NULL, @OldStatusName, @NewStatusName;
+		END;
+
+		IF ISNULL(@OldPriorityId, 0) != @PriorityId
+		BEGIN
+			DECLARE @OldPriorityName VARCHAR(20), @NewPriorityName VARCHAR(20);
+			SELECT @OldPriorityName = priorityName FROM tmsPriority WHERE priorityId = @OldPriorityId;
+			SELECT @NewPriorityName = priorityName FROM tmsPriority WHERE priorityId = @PriorityId;
+			EXEC tmsTicketActivityCreate @TicketId, @ModifiedBy, 'Priority Changed', NULL, @OldPriorityName, @NewPriorityName;
+		END;
+
+		IF ISNULL(@OldCategoryId, 0) != ISNULL(@CategoryId, 0)
+		BEGIN
+			DECLARE @OldCategoryName VARCHAR(50), @NewCategoryName VARCHAR(50);
+			SELECT @OldCategoryName = categoryName FROM tmsCategory WHERE categoryId = @OldCategoryId;
+			SELECT @NewCategoryName = categoryName FROM tmsCategory WHERE categoryId = @CategoryId;
+			EXEC tmsTicketActivityCreate @TicketId, @ModifiedBy, 'Category Changed', NULL, @OldCategoryName, @NewCategoryName;
 		END;
 
 		IF ISNULL(@OldAssignedToUserId, 0) != ISNULL(@AssignedToUserId, 0)
@@ -781,6 +833,28 @@ END;
 GO
 
 -- ================================================================
+-- 29b. tmsTicketGetAttachmentById
+-- ================================================================
+CREATE OR ALTER PROCEDURE tmsTicketGetAttachmentById
+	@AttachmentId INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	BEGIN TRY
+		SELECT ta.attachmentId, ta.ticketId, ta.storedFileName, ta.originalFileName,
+			ta.fileExtension, ta.contentType, ta.fileSize,
+			ta.CreatedOn, ta.CreatedBy, u.fullName AS createdByName
+		FROM tmsTicketAttachment ta
+		INNER JOIN tmsUser u ON ta.CreatedBy = u.userId
+		WHERE ta.attachmentId = @AttachmentId AND ta.IsActive = 1;
+	END TRY
+	BEGIN CATCH
+		THROW;
+	END CATCH;
+END;
+GO
+
+-- ================================================================
 -- 30. tmsUserGetList (filtered, paginated)
 -- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetList
@@ -802,7 +876,7 @@ BEGIN
 			AND (@RoleId IS NULL OR c.roleId = @RoleId);
 
 		SELECT u.userId, u.fullName, c.emailId, u.mobileNumber, c.roleId,
-			r.roleName, d.departmentName, u.IsActive, u.CreatedOn,
+			r.roleName, d.departmentName, u.IsActive, c.isApproved, u.CreatedOn,
 			(SELECT COUNT(*) FROM tmsTicket t WHERE t.CreatedBy = u.userId AND t.IsActive = 1) AS TotalTickets
 		FROM tmsUser u
 		INNER JOIN tmsCredential c ON u.userId = c.userId
@@ -862,6 +936,24 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
+		IF @IsActive = 0
+		BEGIN
+			DECLARE @UpdateTargetRoleId INT;
+			SELECT @UpdateTargetRoleId = c.roleId FROM tmsCredential c WHERE c.userId = @UserId;
+			IF @UpdateTargetRoleId = (SELECT roleId FROM tmsRole WHERE roleName = 'Administrator')
+			BEGIN
+				DECLARE @UpdateActiveAdminCount INT;
+				SELECT @UpdateActiveAdminCount = COUNT(*)
+				FROM tmsUser u
+				INNER JOIN tmsCredential c ON u.userId = c.userId
+				WHERE c.roleId = @UpdateTargetRoleId AND u.IsActive = 1;
+				IF @UpdateActiveAdminCount <= 1
+				BEGIN
+					THROW 51004, 'Cannot deactivate the last active Administrator.', 1;
+				END;
+			END;
+		END;
+
 		UPDATE tmsUser SET fullName = @FullName, mobileNumber = @MobileNumber,
 			departmentId = @DepartmentId, IsActive = @IsActive, modifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
 		WHERE userId = @UserId;
@@ -929,7 +1021,43 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
+		IF @IsActive = 0
+		BEGIN
+			DECLARE @ToggleTargetRoleId INT;
+			SELECT @ToggleTargetRoleId = c.roleId FROM tmsCredential c WHERE c.userId = @UserId;
+			IF @ToggleTargetRoleId = (SELECT roleId FROM tmsRole WHERE roleName = 'Administrator')
+			BEGIN
+				DECLARE @ToggleActiveAdminCount INT;
+				SELECT @ToggleActiveAdminCount = COUNT(*)
+				FROM tmsUser u
+				INNER JOIN tmsCredential c ON u.userId = c.userId
+				WHERE c.roleId = @ToggleTargetRoleId AND u.IsActive = 1;
+				IF @ToggleActiveAdminCount <= 1
+				BEGIN
+					THROW 51005, 'Cannot deactivate the last active Administrator.', 1;
+				END;
+			END;
+		END;
+
 		UPDATE tmsUser SET IsActive = @IsActive, modifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
+		WHERE userId = @UserId;
+	END TRY
+	BEGIN CATCH
+		THROW;
+	END CATCH;
+END;
+GO
+
+-- ================================================================
+-- 34b. tmsUserSetApproval (Admin approves/rejects a self-registered user)
+-- ================================================================
+CREATE OR ALTER PROCEDURE tmsUserSetApproval
+	@UserId INT, @IsApproved BIT, @ModifiedBy INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	BEGIN TRY
+		UPDATE tmsCredential SET isApproved = @IsApproved, ModifiedOn = GETDATE(), ModifiedBy = @ModifiedBy
 		WHERE userId = @UserId;
 	END TRY
 	BEGIN CATCH
@@ -982,7 +1110,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		SELECT u.userId, u.fullName, u.mobileNumber, u.departmentId, d.departmentName,
-			c.credentialId, c.emailId, c.roleId, r.roleName, u.IsActive,
+			c.credentialId, c.emailId, c.passwordHash, c.roleId, r.roleName, u.IsActive,
 			c.isApproved, u.CreatedOn
 		FROM tmsUser u
 		INNER JOIN tmsCredential c ON u.userId = c.userId
@@ -1032,7 +1160,7 @@ BEGIN
 		IF @RoleName = 'Admin'
 		BEGIN
 			SELECT @TotalTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1;
-			SELECT @OpenTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Open');
+			SELECT @OpenTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'New');
 			SELECT @InProgressTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'In Progress');
 			SELECT @ResolvedTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Resolved');
 			SELECT @ClosedTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Closed');
@@ -1040,7 +1168,7 @@ BEGIN
 		ELSE IF @RoleName = 'Support'
 		BEGIN
 			SELECT @TotalTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND (assignedToUserId = @UserId OR CreatedBy = @UserId);
-			SELECT @OpenTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND (assignedToUserId = @UserId OR CreatedBy = @UserId) AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Open');
+			SELECT @OpenTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND (assignedToUserId = @UserId OR CreatedBy = @UserId) AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'New');
 			SELECT @InProgressTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND (assignedToUserId = @UserId OR CreatedBy = @UserId) AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'In Progress');
 			SELECT @ResolvedTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND (assignedToUserId = @UserId OR CreatedBy = @UserId) AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Resolved');
 			SELECT @ClosedTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND (assignedToUserId = @UserId OR CreatedBy = @UserId) AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Closed');
@@ -1048,7 +1176,7 @@ BEGIN
 		ELSE
 		BEGIN
 			SELECT @TotalTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND CreatedBy = @UserId;
-			SELECT @OpenTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND CreatedBy = @UserId AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Open');
+			SELECT @OpenTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND CreatedBy = @UserId AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'New');
 			SELECT @InProgressTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND CreatedBy = @UserId AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'In Progress');
 			SELECT @ResolvedTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND CreatedBy = @UserId AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Resolved');
 			SELECT @ClosedTickets = COUNT(*) FROM tmsTicket WHERE IsActive = 1 AND CreatedBy = @UserId AND statusId = (SELECT statusId FROM tmsStatus WHERE statusName = 'Closed');

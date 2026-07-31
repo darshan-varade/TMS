@@ -34,16 +34,23 @@ namespace TMS.WebApp.Controllers
 
                 if (user == null || !BCrypt.Net.BCrypt.Verify(vm.Password, user.PasswordHash))
                 {
-                    if (user == null && dal.UserCheckEmail(vm.Email))
-                    {
-                        ModelState.AddModelError("", "Your account is not active. Contact admin.");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Invalid email or password.");
-                    }
+                    ModelState.AddModelError("", "Invalid email or password.");
                     return View(vm);
                 }
+
+                if (user.IsApproved == null)
+                {
+                    ModelState.AddModelError("", "Your account is awaiting admin approval. Please contact admin.");
+                    return View(vm);
+                }
+
+                if (user.IsApproved.Value == 0)
+                {
+                    ModelState.AddModelError("", "Your account has been rejected. Contact admin.");
+                    return View(vm);
+                }
+
+                dal.UpdateLastLogin(user.UserId);
 
                 string accessToken = JwtHelper.GenerateAccessToken(user.UserId, user.FullName, user.EmailId, user.RoleName, user.MobileNumber, user.DepartmentName);
                 string refreshToken = JwtHelper.GenerateRefreshToken();
@@ -126,7 +133,7 @@ namespace TMS.WebApp.Controllers
                     dal.MarkOtpUsed(otpId.Value);
                     int userId = dal.UserRegister(vm.FullName, vm.MobileNumber, vm.OtpEmail, vm.PasswordHash, vm.DepartmentId);
 
-                    TempData["info"] = "Account created! You can now login.";
+                    TempData["info"] = "Account created! Please wait for admin approval before you can login.";
                     return RedirectToAction("Login");
                 }
                 catch (Exception ex)

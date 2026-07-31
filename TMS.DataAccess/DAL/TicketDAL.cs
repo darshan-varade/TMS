@@ -328,6 +328,7 @@ namespace TMS.DataAccess.DAL
                         list.Add(new AttachmentViewModel
                         {
                             AttachmentId = Convert.ToInt32(reader["attachmentId"]),
+                            TicketId = Convert.ToInt32(reader["ticketId"]),
                             StoredFileName = reader["storedFileName"].ToString(),
                             OriginalFileName = reader["originalFileName"].ToString(),
                             FileExtension = reader["fileExtension"].ToString(),
@@ -346,6 +347,41 @@ namespace TMS.DataAccess.DAL
                 throw;
             }
             return list;
+        }
+
+        public AttachmentViewModel GetAttachmentById(int attachmentId)
+        {
+            AttachmentViewModel model = null;
+            DbCommand cmd = db.GetStoredProcCommand("tmsTicketGetAttachmentById");
+            db.AddInParameter(cmd, "@AttachmentId", DbType.Int32, attachmentId);
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    if (reader.Read())
+                    {
+                        model = new AttachmentViewModel
+                        {
+                            AttachmentId = Convert.ToInt32(reader["attachmentId"]),
+                            TicketId = Convert.ToInt32(reader["ticketId"]),
+                            StoredFileName = reader["storedFileName"].ToString(),
+                            OriginalFileName = reader["originalFileName"].ToString(),
+                            FileExtension = reader["fileExtension"].ToString(),
+                            ContentType = reader["contentType"].ToString(),
+                            FileSize = Convert.ToInt32(reader["fileSize"]),
+                            CreatedOn = Convert.ToDateTime(reader["CreatedOn"]),
+                            CreatedBy = Convert.ToInt32(reader["CreatedBy"]),
+                            CreatedByName = reader["createdByName"].ToString()
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetAttachmentById");
+                throw;
+            }
+            return model;
         }
     }
 }

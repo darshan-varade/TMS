@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.IO;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Helpers;
@@ -15,12 +16,7 @@ namespace TMS.WebApp
     {
         protected void Application_Start()
         {
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(@"D:\Logs\tms-.log", rollingInterval: RollingInterval.Day)
-                .WriteTo.MSSqlServer(
-                    ConfigurationManager.ConnectionStrings["constr"].ConnectionString,
-                    sinkOptions: new MSSqlServerSinkOptions { TableName = "LogEvents", AutoCreateSqlTable = true })
-                .CreateLogger();
+            ConfigureLogging();
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
@@ -28,6 +24,44 @@ namespace TMS.WebApp
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.NameIdentifier;
+        }
+
+        private static void ConfigureLogging()
+        {
+            try
+            {
+                string logPath = @"D:\Logs\tms-.log";
+                try
+                {
+                    Directory.CreateDirectory(@"D:\Logs");
+                }
+                catch
+                {
+                    string fallbackDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "Logs");
+                    Directory.CreateDirectory(fallbackDir);
+                    logPath = Path.Combine(fallbackDir, "tms-.log");
+                }
+
+                var fileConfig = new LoggerConfiguration()
+                    .WriteTo.File(logPath, rollingInterval: RollingInterval.Day);
+
+                try
+                {
+                    Log.Logger = fileConfig
+                        .WriteTo.MSSqlServer(
+                            ConfigurationManager.ConnectionStrings["constr"].ConnectionString,
+                            sinkOptions: new MSSqlServerSinkOptions { TableName = "LogEvents", AutoCreateSqlTable = true })
+                        .CreateLogger();
+                }
+                catch
+                {
+                    Log.Logger = fileConfig.CreateLogger();
+                }
+            }
+            catch
+            {
+                Log.Logger = new LoggerConfiguration().CreateLogger();
+            }
         }
 
         protected void Application_End()

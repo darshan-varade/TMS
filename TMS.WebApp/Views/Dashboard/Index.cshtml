@@ -127,7 +127,7 @@
                 labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
                 datasets: [{
                     data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
-                    backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#6c757d', '#dc3545']
+                    backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#6c757d', '#dc3545', '#6f42c1']
                 }]
             }
         });

@@ -96,6 +96,19 @@ namespace TMS.WebApp.Controllers
                 return View(vm);
             }
 
+            string fileError = null;
+            if (Request.Files.Count > 0 && Request.Files[0].ContentLength > 0)
+                fileError = ValidateFile(Request.Files[0]);
+
+            if (fileError != null)
+            {
+                ModelState.AddModelError("", fileError);
+                MasterDataDAL master = new MasterDataDAL();
+                vm.Categories = master.GetCategories();
+                vm.Priorities = master.GetPriorities();
+                return View(vm);
+            }
+
             try
             {
                 TicketDAL dal = new TicketDAL();
@@ -130,6 +143,12 @@ namespace TMS.WebApp.Controllers
             if (ticket == null)
             {
                 TempData["info"] = "Ticket not found.";
+                return RedirectToAction("Index");
+            }
+
+            if (!CanAccess(ticket))
+            {
+                TempData["info"] = "You do not have access to this ticket.";
                 return RedirectToAction("Index");
             }
 
@@ -265,6 +284,9 @@ namespace TMS.WebApp.Controllers
             if (ticket == null)
                 return Content("<div class='alert alert-danger mb-0'>Ticket not found.</div>");
 
+            if (IsSupport && ticket.AssignedToUserId != CurrentUserId)
+                return Content("<div class='alert alert-danger mb-0'>You can only update tickets assigned to you.</div>");
+
             var vm = new TicketStatusUpdateViewModel
             {
                 TicketId = ticket.TicketId,
@@ -293,7 +315,14 @@ namespace TMS.WebApp.Controllers
 
             try
             {
-                new TicketDAL().UpdateTicketStatus(vm.TicketId, vm.StatusId, vm.PriorityId, CurrentUserId);
+                TicketDAL dal = new TicketDAL();
+                var ticket = dal.GetTicketById(vm.TicketId);
+                if (ticket == null || !CanAccess(ticket))
+                {
+                    return Json(new { success = false, message = "You do not have access to this ticket." });
+                }
+
+                dal.UpdateTicketStatus(vm.TicketId, vm.StatusId, vm.PriorityId, CurrentUserId);
                 return Json(new { success = true, message = "Ticket status updated successfully." });
             }
             catch (Exception ex)
@@ -307,15 +336,35 @@ namespace TMS.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult AddComment(int ticketId, string comment, bool isInternal = false, HttpPostedFileBase file = null)
         {
+            TicketDAL dal = new TicketDAL();
+            var ticket = dal.GetTicketById(ticketId);
+            if (ticket == null || !CanAccess(ticket))
+            {
+                TempData["info"] = "You do not have access to this ticket.";
+                return RedirectToAction("Details", new { id = ticketId });
+            }
+
             if (string.IsNullOrWhiteSpace(comment))
             {
                 TempData["info"] = "Comment cannot be empty.";
                 return RedirectToAction("Details", new { id = ticketId });
             }
 
+            if (file != null && file.ContentLength > 0)
+            {
+                string fileError = ValidateFile(file);
+                if (fileError != null)
+                {
+                    TempData["info"] = fileError;
+                    return RedirectToAction("Details", new { id = ticketId });
+                }
+            }
+
+            if (!IsAdmin && !IsSupport)
+                isInternal = false;
+
             try
             {
-                TicketDAL dal = new TicketDAL();
                 int commentId = dal.AddComment(ticketId, CurrentUserId, comment, isInternal);
 
                 if (file != null && file.ContentLength > 0)
@@ -339,13 +388,27 @@ namespace TMS.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UploadAttachment(int ticketId)
         {
+            TicketDAL dal = new TicketDAL();
+            var ticket = dal.GetTicketById(ticketId);
+            if (ticket == null || !CanAccess(ticket))
+            {
+                TempData["info"] = "You do not have access to this ticket.";
+                return RedirectToAction("Details", new { id = ticketId });
+            }
+
             try
             {
                 if (Request.Files.Count > 0 && Request.Files[0].ContentLength > 0)
                 {
                     var file = Request.Files[0];
+                    string fileError = ValidateFile(file);
+                    if (fileError != null)
+                    {
+                        TempData["info"] = fileError;
+                        return RedirectToAction("Details", new { id = ticketId });
+                    }
+
                     string storedFileName = StoreFile(file);
-                    TicketDAL dal = new TicketDAL();
                     dal.AddAttachment(ticketId, CurrentUserId, storedFileName, file.FileName, Path.GetExtension(file.FileName), file.ContentType, file.ContentLength);
                     TempData["info"] = "Attachment uploaded.";
                 }
@@ -379,11 +442,26 @@ namespace TMS.WebApp.Controllers
             return RedirectToAction("Index");
         }
 
-        public ActionResult DownloadFile(string fileName)
+        public ActionResult DownloadFile(int attachmentId)
         {
             try
             {
-                string safeFileName = Path.GetFileName(fileName);
+                TicketDAL dal = new TicketDAL();
+                var att = dal.GetAttachmentById(attachmentId);
+                if (att == null)
+                {
+                    TempData["info"] = "File not found.";
+                    return RedirectToAction("Index");
+                }
+
+                var ticket = dal.GetTicketById(att.TicketId);
+                if (ticket == null || !CanAccess(ticket))
+                {
+                    TempData["info"] = "You do not have access to this file.";
+                    return RedirectToAction("Index");
+                }
+
+                string safeFileName = Path.GetFileName(att.StoredFileName);
                 if (string.IsNullOrEmpty(safeFileName))
                 {
                     TempData["info"] = "File not found.";
@@ -398,8 +476,8 @@ namespace TMS.WebApp.Controllers
                     return RedirectToAction("Index");
                 }
 
-                string contentType = GetContentType(safeFileName);
-                return File(fullPath, contentType, safeFileName);
+                string contentType = string.IsNullOrWhiteSpace(att.ContentType) ? GetContentType(att.OriginalFileName) : att.ContentType;
+                return File(fullPath, contentType, att.OriginalFileName);
             }
             catch (Exception ex)
             {
@@ -426,6 +504,31 @@ namespace TMS.WebApp.Controllers
             string filePath = Path.Combine(uploadDir, storedName);
             file.SaveAs(filePath);
             return storedName;
+        }
+
+        private static readonly string[] AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx" };
+        private const int MaxFileSizeBytes = 5 * 1024 * 1024;
+
+        private bool CanAccess(TMS.DataAccess.Models.TicketModel ticket)
+        {
+            if (ticket == null) return false;
+            if (IsAdmin) return true;
+            if (IsSupport) return ticket.AssignedToUserId == CurrentUserId;
+            return ticket.CreatedBy == CurrentUserId;
+        }
+
+        private string ValidateFile(HttpPostedFileBase file)
+        {
+            if (file == null || file.ContentLength <= 0) return null;
+
+            string ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(ext))
+                return "Only images, PDF and DOC/DOCX files are allowed.";
+
+            if (file.ContentLength > MaxFileSizeBytes)
+                return "File size must be 5 MB or less.";
+
+            return null;
         }
 
         private string GetContentType(string fileName)

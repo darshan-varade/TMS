@@ -26,6 +26,7 @@ namespace TMS.DataAccess.ViewModels
         public string RoleName { get; set; }
         public string DepartmentName { get; set; }
         public bool IsActive { get; set; }
+        public byte? IsApproved { get; set; }
         public DateTime CreatedOn { get; set; }
         public int TotalTickets { get; set; }
     }

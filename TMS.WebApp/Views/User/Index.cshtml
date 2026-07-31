@@ -39,6 +39,7 @@
                         <th>Department</th>
                         <th>Tickets</th>
                         <th>Active</th>
+                        <th>Approval</th>
                         <th>Created</th>
                         <th></th>
                     </tr>
@@ -74,6 +75,25 @@
                                         <input type="checkbox" class="form-check-input toggle-status" data-userid="@u.UserId" @(u.IsActive ? "checked" : "") />
                                     </div>
                                 </td>
+                                <td>
+                                    @if (u.IsApproved == null)
+                                    {
+                                        <span class="badge bg-warning text-dark mb-1 d-block">Awaiting</span>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-sm btn-success btn-approve" data-userid="@u.UserId" data-approve="true"><i class="bi bi-check-lg"></i> Approve</button>
+                                            <button type="button" class="btn btn-sm btn-danger btn-approve" data-userid="@u.UserId" data-approve="false"><i class="bi bi-x-lg"></i> Reject</button>
+                                        </div>
+                                    }
+                                    else if (u.IsApproved == 1)
+                                    {
+                                        <span class="badge bg-success">Approved</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger mb-1 d-block">Rejected</span>
+                                        <button type="button" class="btn btn-sm btn-success btn-approve" data-userid="@u.UserId" data-approve="true"><i class="bi bi-check-lg"></i> Approve</button>
+                                    }
+                                </td>
                                 <td>@u.CreatedOn.ToString("dd MMM yyyy")</td>
                                 <td>
                                     <a href="@Url.Action("Edit", new { id = u.UserId })" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
@@ -83,7 +103,7 @@
                     }
                     else
                     {
-                        <tr><td colspan="9" class="text-center text-muted py-4">No users found.</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted py-4">No users found.</td></tr>
                     }
                 </tbody>
             </table>
@@ -130,6 +150,18 @@
                     .fail(function () { showToast('Error changing role', 'error'); sel.val(sel.data('orig')); });
             }).each(function () {
                 $(this).data('orig', $(this).val());
+            });
+
+            $('.btn-approve').click(function () {
+                var btn = $(this);
+                var userId = btn.data('userid');
+                var isApproved = btn.data('approve');
+                $.post('@Url.Action("SetApproval", "User")', { userId: userId, isApproved: isApproved, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
+                    .done(function (r) {
+                        if (r.success) { showToast(r.message, 'info'); setTimeout(function () { window.location.reload(); }, 600); }
+                        else { showToast(r.error, 'error'); }
+                    })
+                    .fail(function () { showToast('Error updating approval', 'error'); });
             });
         });
     </script>

@@ -118,7 +118,7 @@
                     @for (int i = 1; i <= Math.Ceiling((double)Model.TotalRows / Model.PageSize); i++)
                     {
                         <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                            <a class="page-link" href="@Url.Action(myAssignedOnly ? "MyAssigned" : "Index", new { page = i, searchTerm = Model.SearchTerm, statusId = Model.StatusId, priorityId = Model.PriorityId })">@i</a>
+                            <a class="page-link" href="@Url.Action(myAssignedOnly ? "MyAssigned" : "Index", new { page = i, searchTerm = Model.SearchTerm, statusId = Model.StatusId, priorityId = Model.PriorityId, categoryId = Model.CategoryId, dateFrom = Model.DateFrom, dateTo = Model.DateTo, sortColumn = Model.SortColumn, sortDirection = Model.SortDirection })">@i</a>
                         </li>
                     }
                 </ul>

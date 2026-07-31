@@ -132,7 +132,7 @@
     @if (TempData["info"] != null)
     {
         <script>
-            $(function () { showToast('@TempData["info"]', 'info'); });
+            $(function () { showToast('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(Convert.ToString(TempData["info"])))', 'info'); });
         </script>
     }
 

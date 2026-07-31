@@ -12,6 +12,8 @@ namespace TMS.WebApp.Infrastructure
     public static class JwtHelper
     {
         private static readonly string Secret = ConfigurationManager.AppSettings["JwtSecret"];
+        private static readonly string Issuer = ConfigurationManager.AppSettings["JwtIssuer"] ?? "TMS.WebApp";
+        private static readonly string Audience = ConfigurationManager.AppSettings["JwtAudience"] ?? "TMS.WebApp.Client";
         private static readonly int AccessTokenExpiryMinutes = int.Parse(ConfigurationManager.AppSettings["JwtAccessTokenExpiryMinutes"] ?? "15");
         private static readonly int RefreshTokenExpiryDays = int.Parse(ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "2");
 
@@ -37,6 +39,8 @@ namespace TMS.WebApp.Infrastructure
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
+                Issuer = Issuer,
+                Audience = Audience,
                 Expires = DateTime.UtcNow.AddMinutes(AccessTokenExpiryMinutes),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             };
@@ -74,8 +78,10 @@ namespace TMS.WebApp.Infrastructure
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidIssuer = Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = Audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 }, out validatedToken);

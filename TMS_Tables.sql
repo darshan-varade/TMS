@@ -1,3 +1,23 @@
+IF OBJECT_ID(N'dbo.tmsSequence', N'U') IS NOT NULL DROP TABLE dbo.tmsSequence;
+IF OBJECT_ID(N'dbo.tmsOtp', N'U') IS NOT NULL DROP TABLE dbo.tmsOtp;
+IF OBJECT_ID(N'dbo.tmsNotification', N'U') IS NOT NULL DROP TABLE dbo.tmsNotification;
+IF OBJECT_ID(N'dbo.tmsNotificationType', N'U') IS NOT NULL DROP TABLE dbo.tmsNotificationType;
+IF OBJECT_ID(N'dbo.tmsTicketActivity', N'U') IS NOT NULL DROP TABLE dbo.tmsTicketActivity;
+IF OBJECT_ID(N'dbo.tmsTicketAttachment', N'U') IS NOT NULL DROP TABLE dbo.tmsTicketAttachment;
+IF OBJECT_ID(N'dbo.tmsTicketComment', N'U') IS NOT NULL DROP TABLE dbo.tmsTicketComment;
+IF OBJECT_ID(N'dbo.tmsTicket', N'U') IS NOT NULL DROP TABLE dbo.tmsTicket;
+IF OBJECT_ID(N'dbo.tmsRefreshToken', N'U') IS NOT NULL DROP TABLE dbo.tmsRefreshToken;
+IF OBJECT_ID(N'dbo.tmsCredential', N'U') IS NOT NULL DROP TABLE dbo.tmsCredential;
+IF OBJECT_ID(N'dbo.tmsUser', N'U') IS NOT NULL DROP TABLE dbo.tmsUser;
+IF OBJECT_ID(N'dbo.tmsActivityType', N'U') IS NOT NULL DROP TABLE dbo.tmsActivityType;
+IF OBJECT_ID(N'dbo.tmsStatus', N'U') IS NOT NULL DROP TABLE dbo.tmsStatus;
+IF OBJECT_ID(N'dbo.tmsSLA', N'U') IS NOT NULL DROP TABLE dbo.tmsSLA;
+IF OBJECT_ID(N'dbo.tmsPriority', N'U') IS NOT NULL DROP TABLE dbo.tmsPriority;
+IF OBJECT_ID(N'dbo.tmsCategory', N'U') IS NOT NULL DROP TABLE dbo.tmsCategory;
+IF OBJECT_ID(N'dbo.tmsDepartment', N'U') IS NOT NULL DROP TABLE dbo.tmsDepartment;
+IF OBJECT_ID(N'dbo.tmsRole', N'U') IS NOT NULL DROP TABLE dbo.tmsRole;
+GO
+
 CREATE TABLE tmsRole
 (
 	roleId INT IDENTITY(1,1) PRIMARY KEY,
@@ -241,6 +261,7 @@ INSERT INTO tmsActivityType
 VALUES
 ('Ticket Created', 1, GETDATE(), 1, NULL, NULL),
 ('Ticket Assigned', 1, GETDATE(), 1, NULL, NULL),
+('Assignee Changed', 1, GETDATE(), 1, NULL, NULL),
 ('Status Changed', 1, GETDATE(), 1, NULL, NULL),
 ('Priority Changed', 1, GETDATE(), 1, NULL, NULL),
 ('Category Changed', 1, GETDATE(), 1, NULL, NULL),
@@ -283,6 +304,26 @@ CREATE TABLE tmsCredential
 	FOREIGN KEY (userId) REFERENCES tmsUser(userId),
 	FOREIGN KEY (roleId) REFERENCES tmsRole(roleId)
 );
+
+DECLARE @AdminUserId INT, @SupportUserId INT, @EmployeeUserId INT;
+
+INSERT INTO tmsUser (fullName, mobileNumber, departmentId, IsActive, CreatedOn, CreatedBy)
+VALUES ('System Administrator', '0000000000', 1, 1, GETDATE(), 1);
+SET @AdminUserId = SCOPE_IDENTITY();
+
+INSERT INTO tmsUser (fullName, mobileNumber, departmentId, IsActive, CreatedOn, CreatedBy)
+VALUES ('Support Executive', '0000000000', 1, 1, GETDATE(), 1);
+SET @SupportUserId = SCOPE_IDENTITY();
+
+INSERT INTO tmsUser (fullName, mobileNumber, departmentId, IsActive, CreatedOn, CreatedBy)
+VALUES ('Employee', '0000000000', 2, 1, GETDATE(), 1);
+SET @EmployeeUserId = SCOPE_IDENTITY();
+
+INSERT INTO tmsCredential (userId, emailId, passwordHash, roleId, isApproved, IsActive, CreatedOn, CreatedBy)
+VALUES
+(@AdminUserId,   'admin@tms.com',   '$2a$11$1D6x/2GRJ8bfBvxwGp2GxOgzRV2PQzxp/qynDQ6g8xI7UIiLdbyZ.', 1, 1, 1, GETDATE(), 1),
+(@SupportUserId, 'support@tms.com', '$2a$11$x3gl5ROO4.dLp0puHSXvoe2QRmn/CbtcR3I9yJ6ka/rhojFrzNClK', 2, 1, 1, GETDATE(), 1),
+(@EmployeeUserId,'employee@tms.com','$2a$11$2.kLwOmrxmHFuytqsQIOdeW8fXXuD7VhTqzgIWrQTv2rYbNHJTB4G', 3, 1, 1, GETDATE(), 1);
 
 CREATE TABLE tmsRefreshToken
 (

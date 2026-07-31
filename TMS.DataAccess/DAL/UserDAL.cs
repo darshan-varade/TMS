@@ -38,6 +38,7 @@ namespace TMS.DataAccess.DAL
                             DepartmentName = reader["departmentName"].ToString(),
                             CredentialId = Convert.ToInt32(reader["credentialId"]),
                             EmailId = reader["emailId"].ToString(),
+                            PasswordHash = reader["passwordHash"].ToString(),
                             RoleId = Convert.ToInt32(reader["roleId"]),
                             RoleName = reader["roleName"].ToString(),
                             IsActive = Convert.ToBoolean(reader["IsActive"]),
@@ -82,6 +83,7 @@ namespace TMS.DataAccess.DAL
                             RoleName = reader["roleName"].ToString(),
                             DepartmentName = reader["departmentName"].ToString(),
                             IsActive = Convert.ToBoolean(reader["IsActive"]),
+                            IsApproved = reader["isApproved"] != DBNull.Value ? Convert.ToByte(reader["isApproved"]) : (byte?)null,
                             CreatedOn = Convert.ToDateTime(reader["CreatedOn"]),
                             TotalTickets = Convert.ToInt32(reader["TotalTickets"])
                         });
@@ -154,6 +156,23 @@ namespace TMS.DataAccess.DAL
             catch (Exception ex)
             {
                 Log.Error(ex, "Error in ChangeUserRole");
+                throw;
+            }
+        }
+
+        public void SetUserApproval(int userId, bool isApproved, int modifiedBy)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("tmsUserSetApproval");
+            db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            db.AddInParameter(cmd, "@IsApproved", DbType.Boolean, isApproved);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in SetUserApproval");
                 throw;
             }
         }

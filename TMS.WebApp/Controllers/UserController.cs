@@ -1,5 +1,4 @@
 using System;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Mvc;
 using TMS.DataAccess.DAL;
@@ -136,6 +135,15 @@ namespace TMS.WebApp.Controllers
                         vm.Departments = master0.GetDepartments();
                         return View(vm);
                     }
+
+                    if (!vm.IsActive)
+                    {
+                        ModelState.AddModelError("", "You cannot deactivate your own account.");
+                        MasterDataDAL master0 = new MasterDataDAL();
+                        vm.Roles = master0.GetRoles();
+                        vm.Departments = master0.GetDepartments();
+                        return View(vm);
+                    }
                 }
 
                 UserDAL dal = new UserDAL();
@@ -176,18 +184,29 @@ namespace TMS.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred.";
-                for (Exception e = ex; e != null; e = e.InnerException)
-                {
-                    var sqlEx = e as SqlException;
-                    if (sqlEx != null)
-                    {
-                        msg = sqlEx.Errors.Count > 0 ? sqlEx.Errors[0].Message : "An error occurred.";
-                        break;
-                    }
-                }
                 Serilog.Log.Error(ex, "Error changing user role");
-                return Json(new { success = false, error = msg });
+                return Json(new { success = false, error = "An error occurred. Please try again." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult SetApproval(int userId, bool isApproved)
+        {
+            if (userId == CurrentUserId)
+            {
+                return Json(new { success = false, error = "You cannot change your own approval status." });
+            }
+
+            try
+            {
+                new UserDAL().SetUserApproval(userId, isApproved, CurrentUserId);
+                return Json(new { success = true, message = isApproved ? "User approved successfully." : "User rejected successfully." });
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error setting user approval");
+                return Json(new { success = false, error = "An error occurred." });
             }
         }
 
