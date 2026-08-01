@@ -505,6 +505,38 @@ namespace TMS.WebApp.Controllers
             }
         }
 
+        public ActionResult PreviewFile(int attachmentId)
+        {
+            try
+            {
+                TicketDAL dal = new TicketDAL();
+                var att = dal.GetAttachmentById(attachmentId);
+                if (att == null)
+                    return HttpNotFound("File not found.");
+
+                var ticket = dal.GetTicketById(att.TicketId);
+                if (ticket == null || !CanAccess(ticket))
+                    return HttpNotFound("You do not have access to this file.");
+
+                string safeFileName = Path.GetFileName(att.StoredFileName);
+                if (string.IsNullOrEmpty(safeFileName))
+                    return HttpNotFound("File not found.");
+
+                string uploadDir = Server.MapPath("~/Content/Uploads/Tickets");
+                string fullPath = Path.Combine(uploadDir, safeFileName);
+                if (!System.IO.File.Exists(fullPath))
+                    return HttpNotFound("File not found.");
+
+                string contentType = string.IsNullOrWhiteSpace(att.ContentType) ? GetContentType(att.OriginalFileName) : att.ContentType;
+                return File(fullPath, contentType);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error previewing file");
+                return HttpNotFound("Error previewing file.");
+            }
+        }
+
         private void SaveAttachment(HttpPostedFileBase file, int ticketId)
         {
             string storedFileName = StoreFile(file);

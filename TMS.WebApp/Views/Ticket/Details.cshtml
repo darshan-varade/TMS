@@ -102,7 +102,10 @@
                     <div class="attachment-grid">
                         @foreach (var att in Model.Attachments)
                         {
-                            <div class="attachment-item-card">
+                            var previewUrl = Url.Action("PreviewFile", "Ticket", new { attachmentId = att.AttachmentId });
+                            var downloadUrl = Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId });
+                            var fileType = System.IO.Path.GetExtension(att.OriginalFileName);
+                            <div class="attachment-item-card attachment-preview" data-preview-url="@previewUrl" data-download-url="@downloadUrl" data-filename="@att.OriginalFileName" data-filesize="@(att.FileSize / 1024) KB" data-filetype="@fileType">
                                 <div class="attachment-item-preview">
                                     @if (att.OriginalFileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
                                          att.OriginalFileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) || 
@@ -110,7 +113,7 @@
                                          att.OriginalFileName.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
                                          att.OriginalFileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        <img src="@Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId })" alt="@att.OriginalFileName" />
+                                        <img src="@downloadUrl" alt="@att.OriginalFileName" />
                                     }
                                     else if (att.OriginalFileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
                                     {
@@ -122,7 +125,7 @@
                                     }
                                 </div>
                                 <div class="attachment-item-meta">
-                                    <a href="@Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId })" class="attachment-item-name" title="@att.OriginalFileName">@att.OriginalFileName</a>
+                                    <span class="attachment-item-name" title="@att.OriginalFileName">@att.OriginalFileName</span>
                                     <span class="attachment-item-size">@(att.FileSize / 1024) KB</span>
                                 </div>
                             </div>
@@ -247,7 +250,10 @@
                                                 <div class="attachment-grid mt-3">
                                                     @foreach (var att in c.Attachments)
                                                     {
-                                                        <div class="attachment-item-card">
+                                                        var cPreviewUrl = Url.Action("PreviewFile", "Ticket", new { attachmentId = att.AttachmentId });
+                                                        var cDownloadUrl = Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId });
+                                                        var cFileType = System.IO.Path.GetExtension(att.OriginalFileName);
+                                                        <div class="attachment-item-card attachment-preview" data-preview-url="@cPreviewUrl" data-download-url="@cDownloadUrl" data-filename="@att.OriginalFileName" data-filesize="@(att.FileSize / 1024) KB" data-filetype="@cFileType">
                                                             <div class="attachment-item-preview">
                                                                 @if (att.OriginalFileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
                                                                      att.OriginalFileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) || 
@@ -255,7 +261,7 @@
                                                                      att.OriginalFileName.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
                                                                      att.OriginalFileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
                                                                 {
-                                                                    <img src="@Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId })" alt="@att.OriginalFileName" />
+                                                                    <img src="@cDownloadUrl" alt="@att.OriginalFileName" />
                                                                 }
                                                                 else if (att.OriginalFileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
                                                                 {
@@ -267,7 +273,7 @@
                                                                 }
                                                             </div>
                                                             <div class="attachment-item-meta">
-                                                                <a href="@Url.Action("DownloadFile", "Ticket", new { attachmentId = att.AttachmentId })" class="attachment-item-name" title="@att.OriginalFileName">@att.OriginalFileName</a>
+                                                                <span class="attachment-item-name" title="@att.OriginalFileName">@att.OriginalFileName</span>
                                                                 <span class="attachment-item-size">@(att.FileSize / 1024) KB</span>
                                                             </div>
                                                         </div>
@@ -449,10 +455,11 @@
             </div>
         </div>
     </div>
+
 }
 
 @section scripts {
-    <script src="~/PageScripts/TicketDetailScript.js"></script>
+    <script src="~/PageScripts/TicketDetailScript.js?v=@DateTime.Now.Ticks"></script>
     <script>
         function expandCommentEditor() {
             $('#commentCollapsed').addClass('d-none');
@@ -503,5 +510,6 @@
                 $('.timeline-item[data-type="comment"]').addClass('d-none');
             }
         }
+
     </script>
 }
