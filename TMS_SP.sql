@@ -724,14 +724,14 @@ GO
 -- 25. tmsTicketAttachmentCreate
 -- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketAttachmentCreate
-	@TicketId INT, @CreatedBy INT, @StoredFileName VARCHAR(255), @OriginalFileName VARCHAR(255),
+	@TicketId INT, @CommentId INT = NULL, @CreatedBy INT, @StoredFileName VARCHAR(255), @OriginalFileName VARCHAR(255),
 	@FileExtension VARCHAR(10), @ContentType VARCHAR(100), @FileSize INT
 AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		INSERT INTO tmsTicketAttachment (ticketId, storedFileName, originalFileName, fileExtension, contentType, fileSize, IsActive, CreatedOn, CreatedBy)
-		VALUES (@TicketId, @StoredFileName, @OriginalFileName, @FileExtension, @ContentType, @FileSize, 1, GETDATE(), @CreatedBy);
+		INSERT INTO tmsTicketAttachment (ticketId, commentId, storedFileName, originalFileName, fileExtension, contentType, fileSize, IsActive, CreatedOn, CreatedBy)
+		VALUES (@TicketId, @CommentId, @StoredFileName, @OriginalFileName, @FileExtension, @ContentType, @FileSize, 1, GETDATE(), @CreatedBy);
 		DECLARE @NewAttachmentId INT = SCOPE_IDENTITY();
 		EXEC tmsTicketActivityCreate @TicketId, @CreatedBy, 'Attachment Added', NULL, NULL, @OriginalFileName;
 		SELECT @NewAttachmentId AS AttachmentId;
@@ -818,7 +818,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		SELECT ta.attachmentId, ta.ticketId, ta.storedFileName, ta.originalFileName,
+		SELECT ta.attachmentId, ta.ticketId, ta.commentId, ta.storedFileName, ta.originalFileName,
 			ta.fileExtension, ta.contentType, ta.fileSize,
 			ta.CreatedOn, ta.CreatedBy, u.fullName AS createdByName
 		FROM tmsTicketAttachment ta
@@ -841,7 +841,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		SELECT ta.attachmentId, ta.ticketId, ta.storedFileName, ta.originalFileName,
+		SELECT ta.attachmentId, ta.ticketId, ta.commentId, ta.storedFileName, ta.originalFileName,
 			ta.fileExtension, ta.contentType, ta.fileSize,
 			ta.CreatedOn, ta.CreatedBy, u.fullName AS createdByName
 		FROM tmsTicketAttachment ta

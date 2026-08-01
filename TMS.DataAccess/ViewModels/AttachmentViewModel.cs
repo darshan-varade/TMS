@@ -5,6 +5,7 @@ namespace TMS.DataAccess.ViewModels
     {
         public int AttachmentId { get; set; }
         public int TicketId { get; set; }
+        public int? CommentId { get; set; }
         public string StoredFileName { get; set; }
         public string OriginalFileName { get; set; }
         public string FileExtension { get; set; }

@@ -171,6 +171,13 @@ namespace TMS.WebApp.Controllers
                 return RedirectToAction("Index");
             }
 
+            var comments = dal.GetComments(id);
+            var attachments = dal.GetAttachments(id);
+            foreach (var c in comments)
+            {
+                c.Attachments = attachments.Where(a => a.CommentId == c.CommentId).ToList();
+            }
+
             var vm = new TicketDetailViewModel
             {
                 TicketId = ticket.TicketId,
@@ -190,9 +197,9 @@ namespace TMS.WebApp.Controllers
                 CreatedOn = ticket.CreatedOn,
                 CreatedByName = ticket.CreatedByName,
                 CreatedByUserId = ticket.CreatedBy,
-                Comments = dal.GetComments(id),
+                Comments = comments,
                 Activities = IsEmployee ? null : dal.GetActivities(id),
-                Attachments = dal.GetAttachments(id)
+                Attachments = attachments
             };
 
             ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name", ticket.StatusId);
@@ -398,7 +405,7 @@ namespace TMS.WebApp.Controllers
                 if (file != null && file.ContentLength > 0)
                 {
                     string storedFileName = StoreFile(file);
-                    dal.AddAttachment(ticketId, CurrentUserId, storedFileName, file.FileName, Path.GetExtension(file.FileName), file.ContentType, file.ContentLength);
+                    dal.AddAttachment(ticketId, CurrentUserId, storedFileName, file.FileName, Path.GetExtension(file.FileName), file.ContentType, file.ContentLength, commentId);
                 }
 
                 TempData["info"] = "Comment added.";
@@ -407,44 +414,6 @@ namespace TMS.WebApp.Controllers
             {
                 Serilog.Log.Error(ex, "Error adding comment");
                 TempData["info"] = "Error adding comment.";
-            }
-
-            return RedirectToAction("Details", new { id = ticketId });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult UploadAttachment(int ticketId)
-        {
-            TicketDAL dal = new TicketDAL();
-            var ticket = dal.GetTicketById(ticketId);
-            if (ticket == null || !CanAccess(ticket))
-            {
-                TempData["info"] = "You do not have access to this ticket.";
-                return RedirectToAction("Details", new { id = ticketId });
-            }
-
-            try
-            {
-                if (Request.Files.Count > 0 && Request.Files[0].ContentLength > 0)
-                {
-                    var file = Request.Files[0];
-                    string fileError = ValidateFile(file);
-                    if (fileError != null)
-                    {
-                        TempData["info"] = fileError;
-                        return RedirectToAction("Details", new { id = ticketId });
-                    }
-
-                    string storedFileName = StoreFile(file);
-                    dal.AddAttachment(ticketId, CurrentUserId, storedFileName, file.FileName, Path.GetExtension(file.FileName), file.ContentType, file.ContentLength);
-                    TempData["info"] = "Attachment uploaded.";
-                }
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "Error uploading attachment");
-                TempData["info"] = "Error uploading attachment.";
             }
 
             return RedirectToAction("Details", new { id = ticketId });

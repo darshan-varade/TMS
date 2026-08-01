@@ -229,10 +229,11 @@ namespace TMS.DataAccess.DAL
             }
         }
 
-        public int AddAttachment(int ticketId, int createdBy, string storedFileName, string originalFileName, string fileExtension, string contentType, int fileSize)
+        public int AddAttachment(int ticketId, int createdBy, string storedFileName, string originalFileName, string fileExtension, string contentType, int fileSize, int? commentId = null)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsTicketAttachmentCreate");
             db.AddInParameter(cmd, "@TicketId", DbType.Int32, ticketId);
+            db.AddInParameter(cmd, "@CommentId", DbType.Int32, commentId ?? (object)DBNull.Value);
             db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, createdBy);
             db.AddInParameter(cmd, "@StoredFileName", DbType.String, storedFileName);
             db.AddInParameter(cmd, "@OriginalFileName", DbType.String, originalFileName);
@@ -330,6 +331,7 @@ namespace TMS.DataAccess.DAL
                         {
                             AttachmentId = Convert.ToInt32(reader["attachmentId"]),
                             TicketId = Convert.ToInt32(reader["ticketId"]),
+                            CommentId = reader["commentId"] != DBNull.Value ? Convert.ToInt32(reader["commentId"]) : (int?)null,
                             StoredFileName = reader["storedFileName"].ToString(),
                             OriginalFileName = reader["originalFileName"].ToString(),
                             FileExtension = reader["fileExtension"].ToString(),
@@ -365,6 +367,7 @@ namespace TMS.DataAccess.DAL
                         {
                             AttachmentId = Convert.ToInt32(reader["attachmentId"]),
                             TicketId = Convert.ToInt32(reader["ticketId"]),
+                            CommentId = reader["commentId"] != DBNull.Value ? Convert.ToInt32(reader["commentId"]) : (int?)null,
                             StoredFileName = reader["storedFileName"].ToString(),
                             OriginalFileName = reader["originalFileName"].ToString(),
                             FileExtension = reader["fileExtension"].ToString(),

@@ -64,11 +64,11 @@
                         {
                             <div class="approval-seg" data-userid="@u.UserId" data-orig="@(u.IsApproved == 0 ? "rejected" : u.IsApproved == 1 ? "approved" : "awaiting")">
                                 <input type="radio" class="approval-radio rejected" name="approval_@u.UserId" id="rejected_@u.UserId" value="rejected" @(u.IsApproved == 0 ? "checked" : "") />
-                                <label for="rejected_@u.UserId">Rejected</label>
+                                <label for="rejected_@u.UserId" data-tooltip="Rejected">R</label>
                                 <input type="radio" class="approval-radio awaiting" name="approval_@u.UserId" id="awaiting_@u.UserId" value="awaiting" @(u.IsApproved == null ? "checked" : "") />
-                                <label for="awaiting_@u.UserId">Awaiting</label>
+                                <label for="awaiting_@u.UserId" data-tooltip="Awaiting">W</label>
                                 <input type="radio" class="approval-radio approved" name="approval_@u.UserId" id="approved_@u.UserId" value="approved" @(u.IsApproved == 1 ? "checked" : "") />
-                                <label for="approved_@u.UserId">Approved</label>
+                                <label for="approved_@u.UserId" data-tooltip="Approved">A</label>
                                 <span class="approval-slider"></span>
                             </div>
                         }

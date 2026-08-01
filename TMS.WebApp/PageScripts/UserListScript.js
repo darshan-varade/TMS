@@ -209,23 +209,42 @@ $(function () {
         var sel = $(this);
         var userId = sel.data('userid');
         var roleId = sel.val();
+        sel.prop('disabled', true);
         $.post('/User/ChangeRole', { userId: userId, roleId: roleId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
             .done(function (r) {
-                if (r.success) { showToast(r.message, 'info'); sel.data('orig', roleId); }
-                else { showToast(r.error, 'error'); sel.val(sel.data('orig')); }
+                if (r.success) {
+                    showToast(r.message, 'info');
+                    sel.data('orig', roleId).attr('data-orig', roleId);
+                } else {
+                    showToast(r.error, 'error');
+                    sel.val(sel.data('orig'));
+                }
             })
-            .fail(function () { showToast('Error changing role', 'error'); sel.val(sel.data('orig')); });
+            .fail(function () {
+                showToast('Error changing role', 'error');
+                sel.val(sel.data('orig'));
+            })
+            .always(function () {
+                sel.prop('disabled', false);
+            });
     });
 
     $(document).on('change', '.approval-radio', function () {
         var seg = $(this).closest('.approval-seg');
         var userId = seg.data('userid');
         var approval = $(this).val();
+        seg.addClass('loading');
         $.post('/User/SetApproval', { userId: userId, approval: approval, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
             .done(function (r) {
                 if (r.success) {
-                    seg.data('orig', approval);
-                    showToast(r.message, 'success');
+                    seg.data('orig', approval).attr('data-orig', approval);
+                    var toastType = 'success';
+                    if (approval === 'rejected') {
+                        toastType = 'error';
+                    } else if (approval === 'awaiting') {
+                        toastType = 'warning';
+                    }
+                    showToast(r.message, toastType);
                 } else {
                     showToast(r.error, 'error');
                     seg.find('input[value="' + seg.data('orig') + '"]').prop('checked', true);
@@ -234,6 +253,9 @@ $(function () {
             .fail(function () {
                 showToast('Error updating approval', 'error');
                 seg.find('input[value="' + seg.data('orig') + '"]').prop('checked', true);
+            })
+            .always(function () {
+                seg.removeClass('loading');
             });
     });
 

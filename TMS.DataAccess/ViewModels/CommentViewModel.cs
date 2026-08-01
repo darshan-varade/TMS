@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace TMS.DataAccess.ViewModels
 {
@@ -10,6 +11,7 @@ namespace TMS.DataAccess.ViewModels
         public DateTime CreatedOn { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedByName { get; set; }
+        public List<AttachmentViewModel> Attachments { get; set; }
     }
 
     public class CommentAddViewModel
