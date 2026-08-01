@@ -4,64 +4,76 @@
 }
 
 <div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>Dashboard</h1>
-        <p class="text-muted">Welcome back, @User.Identity.Name</p>
+    <div class="dashboard-header mb-4">
+        <h2 class="fw-bold mb-1">Dashboard</h2>
+        <p class="text-secondary mb-0">Welcome back, <span class="fw-semibold text-primary">@User.Identity.Name</span></p>
     </div>
 
-    <div class="row g-3 mt-3">
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted">Total Tickets</h5>
-                    <h2 class="mb-0">@Model.TotalTickets</h2>
+    <div class="row g-4 mt-2">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-light">
+                    <i class="bi bi-ticket-detailed"></i>
+                </div>
+                <div>
+                    <p class="stat-label">Total Tickets</p>
+                    <h3 class="stat-value">@Model.TotalTickets</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted">Open</h5>
-                    <h2 class="mb-0 text-warning">@Model.OpenTickets</h2>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-light">
+                    <i class="bi bi-envelope-open"></i>
+                </div>
+                <div>
+                    <p class="stat-label">Open</p>
+                    <h3 class="stat-value text-warning">@Model.OpenTickets</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted">In Progress</h5>
-                    <h2 class="mb-0 text-primary">@Model.InProgressTickets</h2>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-info-light">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <p class="stat-label">In Progress</p>
+                    <h3 class="stat-value text-info">@Model.InProgressTickets</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted">Closed</h5>
-                    <h2 class="mb-0 text-success">@Model.ClosedTickets</h2>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-success-light">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <p class="stat-label">Closed</p>
+                    <h3 class="stat-value text-success">@Model.ClosedTickets</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-3 mt-2">
+    <div class="row g-4 mt-3">
         <div class="col-md-6">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0">Tickets by Status</h6>
+                <div class="card-header border-0 pb-0" style="background: transparent;">
+                    <h6 class="mb-0 fw-bold">Tickets by Status</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="statusChart" height="200"></canvas>
+                    <canvas id="statusChart" height="220"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0">Tickets by Priority</h6>
+                <div class="card-header border-0 pb-0" style="background: transparent;">
+                    <h6 class="mb-0 fw-bold">Tickets by Priority</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="priorityChart" height="200"></canvas>
+                    <canvas id="priorityChart" height="220"></canvas>
                 </div>
             </div>
         </div>
@@ -69,82 +81,117 @@
 
     @if (User.IsInRole("Administrator"))
     {
-        <div class="row mt-3">
+        <div class="row mt-4">
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Unassigned Tickets</h6>
-                        <a href="@Url.Action("Index", "Ticket")" class="btn btn-sm btn-outline-primary">View All</a>
+                    <div class="card-header border-0 d-flex justify-content-between align-items-center py-3" style="background: transparent;">
+                        <h6 class="mb-0 fw-bold">Unassigned Tickets</h6>
+                        <a href="@Url.Action("Index", "Ticket")" class="btn btn-sm btn-outline-primary py-1 px-3">View All</a>
                     </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Ticket #</th>
-                                    <th>Title</th>
-                                    <th>Status</th>
-                                    <th>Priority</th>
-                                    <th>Created By</th>
-                                    <th>Assigned To</th>
-                                    <th>Created</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.RecentTickets != null && Model.RecentTickets.Any())
-                                {
-                                    foreach (var t in Model.RecentTickets)
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Ticket #</th>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Created By</th>
+                                        <th>Assigned To</th>
+                                        <th class="pe-3">Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.RecentTickets != null && Model.RecentTickets.Any())
                                     {
-                                        <tr>
-                                            <td><a href="@Url.Action("Details", "Ticket", new { id = t.TicketId })">@t.TicketNumber</a></td>
-                                            <td>@t.Title</td>
-                                            <td><span class="badge bg-info">@t.StatusName</span></td>
-                                            <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : "bg-secondary")">@t.PriorityName</span></td>
-                                            <td>@t.CreatedByName</td>
-                                            <td>@(t.AssignedToName ?? "-")</td>
-                                            <td>@t.CreatedOn.ToString("dd MMM yyyy")</td>
-                                        </tr>
+                                        foreach (var t in Model.RecentTickets)
+                                        {
+                                            <tr>
+                                                <td class="ps-3"><a href="@Url.Action("Details", "Ticket", new { id = t.TicketId })" class="fw-semibold text-decoration-none">@t.TicketNumber</a></td>
+                                                <td>@t.Title</td>
+                                                <td>
+                                                    <span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span>
+                                                </td>
+                                                <td>@t.CreatedByName</td>
+                                                <td><span class="text-muted">@(t.AssignedToName ?? "-")</span></td>
+                                                <td class="pe-3 text-secondary">@t.CreatedOn.ToString("dd MMM yyyy")</td>
+                                            </tr>
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    <tr><td colspan="7" class="text-center text-muted py-3">No tickets found</td></tr>
-                                }
-                            </tbody>
-                        </table>
+                                    else
+                                    {
+                                        <tr><td colspan="7" class="text-center text-muted py-4">No unassigned tickets found</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     }
 </div>
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
-        var statusCtx = document.getElementById('statusChart').getContext('2d');
-        new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
-                datasets: [{
-                    data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
-                    backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#6c757d', '#dc3545', '#6f42c1']
-                }]
-            }
-        });
+        document.addEventListener("DOMContentLoaded", function() {
+            var statusCtx = document.getElementById('statusChart').getContext('2d');
+            
+            // Generate modern charts styling
+            var chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: getComputedStyle(document.body).getPropertyValue('--text-secondary').trim(),
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                size: 12
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    }
+                },
+                cutout: '70%'
+            };
 
-        var priorityCtx = document.getElementById('priorityChart').getContext('2d');
-        new Chart(priorityCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.PriorityChart.Select(s => $"'{s.Label}'")))],
-                datasets: [{
-                    data: [@string.Join(",", Model.PriorityChart.Select(s => s.Value.ToString()))],
-                    backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6f42c1']
-                }]
-            }
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
+                    datasets: [{
+                        data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
+                        backgroundColor: ['#6366F1', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#64748B'],
+                        borderWidth: 0
+                    }]
+                },
+                options: chartOptions
+            });
+
+            var priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(priorityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.PriorityChart.Select(s => $"'{s.Label}'")))],
+                    datasets: [{
+                        data: [@string.Join(",", Model.PriorityChart.Select(s => s.Value.ToString()))],
+                        backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: chartOptions
+            });
+
+
         });
     </script>
 }
+

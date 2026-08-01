@@ -51,7 +51,7 @@
         </div>
 
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white"><h6 class="mb-0">Conversation (@(Model.Comments != null ? Model.Comments.Count : 0))</h6></div>
+            <div class="card-header"><h6 class="mb-0">Conversation (@(Model.Comments != null ? Model.Comments.Count : 0))</h6></div>
             <div class="card-body">
                 @if (Model.Comments != null && Model.Comments.Any())
                 {
@@ -80,7 +80,7 @@
         @if (!isEmployee)
         {
             <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-white d-flex justify-content-between">
+                <div class="card-header d-flex justify-content-between">
                     <h6 class="mb-0">Activity Log</h6>
                 </div>
                 <div class="card-body p-0">
@@ -125,23 +125,25 @@
 
     <div class="col-md-4">
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white"><h6 class="mb-0">Details</h6></div>
+            <div class="card-header"><h6 class="mb-0">Details</h6></div>
             <div class="card-body">
-                <table class="table table-sm">
-                    <tr><th>Created By</th><td>@Model.CreatedByName</td></tr>
-                    <tr><th>Assigned To</th><td>@(Model.AssignedToName ?? "Unassigned")</td></tr>
-                    <tr><th>Due Date</th><td>@Model.DueDate.ToString("dd MMM yyyy HH:mm")</td></tr>
-                    @if (Model.ResolvedOn.HasValue)
-                    {
-                        <tr><th>Resolved On</th><td>@Model.ResolvedOn.Value.ToString("dd MMM yyyy HH:mm")</td></tr>
-                    }
-                    <tr><th>Created</th><td>@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</td></tr>
+                <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                        <tr><th class="ps-0 text-muted fw-semibold" style="width: 40%;">Created By</th><td class="pe-0 text-end fw-medium">@Model.CreatedByName</td></tr>
+                        <tr><th class="ps-0 text-muted fw-semibold">Assigned To</th><td class="pe-0 text-end fw-medium">@(Model.AssignedToName ?? "Unassigned")</td></tr>
+                        <tr><th class="ps-0 text-muted fw-semibold">Due Date</th><td class="pe-0 text-end fw-medium">@Model.DueDate.ToString("dd MMM yyyy HH:mm")</td></tr>
+                        @if (Model.ResolvedOn.HasValue)
+                        {
+                            <tr><th class="ps-0 text-muted fw-semibold">Resolved On</th><td class="pe-0 text-end fw-medium">@Model.ResolvedOn.Value.ToString("dd MMM yyyy HH:mm")</td></tr>
+                        }
+                        <tr><th class="ps-0 text-muted fw-semibold">Created</th><td class="pe-0 text-end fw-medium">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
 
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white"><h6 class="mb-0">Attachments</h6></div>
+            <div class="card-header"><h6 class="mb-0">Attachments</h6></div>
             <div class="card-body">
                 @if (Model.Attachments != null && Model.Attachments.Any())
                 {
@@ -168,7 +170,7 @@
         </div>
 
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white"><h6 class="mb-0">Add Comment</h6></div>
+            <div class="card-header"><h6 class="mb-0">Add Comment</h6></div>
             <div class="card-body">
                 <form method="post" action="@Url.Action("AddComment", "Ticket")" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
