@@ -1,0 +1,92 @@
+@model TMS.DataAccess.ViewModels.UserListViewModel
+@{
+    int currentUserId = (int)ViewBag.CurrentUserId;
+    var roles = (SelectList)ViewBag.Roles;
+}
+
+<input type="hidden" id="TotalRows" value="@Model.TotalRows" />
+
+<table class="table table-hover mb-0">
+    <thead class="table-light">
+        <tr>
+            <th class="sortable" data-column="FullName">Name <span class="sort-icon"></span></th>
+            <th class="sortable" data-column="EmailId">Email <span class="sort-icon"></span></th>
+            <th>Mobile</th>
+            <th class="sortable" data-column="RoleName">Role <span class="sort-icon"></span></th>
+            <th class="sortable" data-column="DepartmentName">Department <span class="sort-icon"></span></th>
+            <th>Approval</th>
+            <th class="sortable" data-column="CreatedOn">Created <span class="sort-icon"></span></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Users != null && Model.Users.Any())
+        {
+            foreach (var u in Model.Users)
+            {
+                <tr>
+                    <td>@u.FullName</td>
+                    <td>@u.EmailId</td>
+                    <td>@(u.MobileNumber ?? "-")</td>
+                    <td>
+                        @if (u.UserId == currentUserId)
+                        {
+                            <span class="badge bg-info">@u.RoleName</span>
+                        }
+                        else
+                        {
+                            <select class="form-select form-select-sm change-role" data-userid="@u.UserId" data-orig="@u.RoleId" title="Change role">
+                                @foreach (var r in roles)
+                                {
+                                    <option value="@r.Value" @(u.RoleId.ToString() == r.Value ? "selected" : "")>@r.Text</option>
+                                }
+                            </select>
+                        }
+                    </td>
+                    <td>@u.DepartmentName</td>
+                    <td>
+                        @if (u.UserId == currentUserId)
+                        {
+                            if (u.IsApproved == 0)
+                            {
+                                <span class="badge bg-danger">Rejected</span>
+                            }
+                            else if (u.IsApproved == 1)
+                            {
+                                <span class="badge bg-success">Approved</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Awaiting</span>
+                            }
+                        }
+                        else
+                        {
+                            <div class="approval-seg" data-userid="@u.UserId" data-orig="@(u.IsApproved == 0 ? "rejected" : u.IsApproved == 1 ? "approved" : "awaiting")">
+                                <input type="radio" class="approval-radio rejected" name="approval_@u.UserId" id="rejected_@u.UserId" value="rejected" @(u.IsApproved == 0 ? "checked" : "") />
+                                <label for="rejected_@u.UserId">Rejected</label>
+                                <input type="radio" class="approval-radio awaiting" name="approval_@u.UserId" id="awaiting_@u.UserId" value="awaiting" @(u.IsApproved == null ? "checked" : "") />
+                                <label for="awaiting_@u.UserId">Awaiting</label>
+                                <input type="radio" class="approval-radio approved" name="approval_@u.UserId" id="approved_@u.UserId" value="approved" @(u.IsApproved == 1 ? "checked" : "") />
+                                <label for="approved_@u.UserId">Approved</label>
+                                <span class="approval-slider"></span>
+                            </div>
+                        }
+                    </td>
+                    <td>@u.CreatedOn.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = u.UserId })" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        @if (u.UserId != currentUserId)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-user" data-userid="@u.UserId" data-name="@u.FullName"><i class="bi bi-trash"></i></button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="8" class="text-center text-muted py-4">No users found.</td></tr>
+        }
+    </tbody>
+</table>

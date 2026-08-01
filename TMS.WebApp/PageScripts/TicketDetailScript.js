@@ -4,12 +4,24 @@ $(function () {
     var actionModal = new bootstrap.Modal(actionModalEl);
     var actionModalContent = $('#ticketActionModalContent');
 
+    function initModalSelect2() {
+        actionModalContent.find('select.form-select').each(function () {
+            if (!$(this).data('select2')) {
+                $(this).select2({
+                    width: '100%',
+                    dropdownParent: actionModalEl
+                });
+            }
+        });
+    }
+
     function loadModal(url, ticketId) {
         actionModalContent.html('<div class="modal-body text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>');
         actionModal.show();
         $.get(url, { id: ticketId })
             .done(function (html) {
                 actionModalContent.html(html);
+                initModalSelect2();
                 var form = actionModalContent.find('form');
                 if (form.length) bindModalForm(form);
             })
@@ -36,6 +48,7 @@ $(function () {
                         }
                     } else {
                         actionModalContent.html(response);
+                        initModalSelect2();
                         bindModalForm(actionModalContent.find('form'));
                     }
                 })

@@ -11,47 +11,24 @@ namespace TMS.WebApp.Controllers
 {
     public class TicketController : BaseController
     {
-        public ActionResult Index(int? page, string searchTerm, int? statusId, int? priorityId, int? categoryId, DateTime? dateFrom, DateTime? dateTo, string sortColumn, string sortDirection)
+        public ActionResult Index()
         {
             ViewBag.Title = "Tickets";
-            return BuildList(page, searchTerm, statusId, priorityId, categoryId, dateFrom, dateTo, sortColumn, sortDirection, null, false);
+            return BuildShell(false);
         }
 
-        public ActionResult MyAssigned(int? page, string searchTerm, int? statusId, int? priorityId, int? categoryId, DateTime? dateFrom, DateTime? dateTo, string sortColumn, string sortDirection)
+        public ActionResult MyAssigned()
         {
             ViewBag.Title = "My Assigned Tickets";
-            return BuildList(page, searchTerm, statusId, priorityId, categoryId, dateFrom, dateTo, sortColumn, sortDirection, CurrentUserId, true);
+            return BuildShell(true);
         }
 
-        private ActionResult BuildList(int? page, string searchTerm, int? statusId, int? priorityId, int? categoryId, DateTime? dateFrom, DateTime? dateTo, string sortColumn, string sortDirection, int? assignedToUserId, bool myAssignedOnly)
+        private ActionResult BuildShell(bool myAssignedOnly)
         {
-            TicketDAL dal = new TicketDAL();
             MasterDataDAL master = new MasterDataDAL();
-
-            int pageNumber = page ?? 1;
-            if (string.IsNullOrEmpty(sortColumn)) sortColumn = "CreatedOn";
-            if (string.IsNullOrEmpty(sortDirection)) sortDirection = "DESC";
-
-            int totalRows;
-            var vm = new TicketListViewModel
-            {
-                Tickets = dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), searchTerm, statusId, priorityId, categoryId, dateFrom, dateTo, sortColumn, sortDirection, pageNumber, 10, out totalRows, assignedToUserId),
-                TotalRows = totalRows,
-                PageNumber = pageNumber,
-                PageSize = 10,
-                SearchTerm = searchTerm,
-                StatusId = statusId,
-                PriorityId = priorityId,
-                CategoryId = categoryId,
-                DateFrom = dateFrom,
-                DateTo = dateTo,
-                SortColumn = sortColumn,
-                SortDirection = sortDirection
-            };
-
-            ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name", statusId);
-            ViewBag.Priorities = new SelectList(master.GetPriorities(), "Id", "Name", priorityId);
-            ViewBag.Categories = new SelectList(master.GetCategories(), "Id", "Name", categoryId);
+            ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name");
+            ViewBag.Priorities = new SelectList(master.GetPriorities(), "Id", "Name");
+            ViewBag.Categories = new SelectList(master.GetCategories(), "Id", "Name");
             ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name");
             ViewBag.IsSupport = IsSupport;
             ViewBag.IsAdmin = IsAdmin;
@@ -59,7 +36,47 @@ namespace TMS.WebApp.Controllers
             ViewBag.CurrentUserId = CurrentUserId;
             ViewBag.MyAssignedOnly = myAssignedOnly;
 
-            return View("Index", vm);
+            return View("Index", new TicketListViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Index")]
+        public ActionResult IndexPost(TicketListViewModel vm)
+        {
+            return BuildList(vm, null, false);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("MyAssigned")]
+        public ActionResult MyAssignedPost(TicketListViewModel vm)
+        {
+            return BuildList(vm, CurrentUserId, true);
+        }
+
+        private ActionResult BuildList(TicketListViewModel vm, int? assignedToUserId, bool myAssignedOnly)
+        {
+            TicketDAL dal = new TicketDAL();
+
+            int pageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
+            vm.PageSize = vm.PageSize <= 0 ? 10 : vm.PageSize;
+            if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
+            if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
+
+            int totalRows;
+            vm.Tickets = dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), vm.SearchTerm, vm.StatusId, vm.PriorityId, vm.CategoryId, vm.DateFrom, vm.DateTo, vm.SortColumn, vm.SortDirection, pageNumber, vm.PageSize, out totalRows, assignedToUserId);
+            vm.TotalRows = totalRows;
+            vm.PageNumber = pageNumber;
+
+            ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name");
+            ViewBag.IsSupport = IsSupport;
+            ViewBag.IsAdmin = IsAdmin;
+            ViewBag.IsEmployee = IsEmployee;
+            ViewBag.CurrentUserId = CurrentUserId;
+            ViewBag.MyAssignedOnly = myAssignedOnly;
+
+            return PartialView("_TicketListPartial", vm);
         }
 
         public ActionResult Create()

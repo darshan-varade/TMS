@@ -872,7 +872,7 @@ BEGIN
 		INNER JOIN tmsCredential c ON u.userId = c.userId
 		INNER JOIN tmsRole r ON c.roleId = r.roleId
 		INNER JOIN tmsDepartment d ON u.departmentId = d.departmentId
-		WHERE (@SearchTerm IS NULL OR u.fullName LIKE '%' + @SearchTerm + '%' OR c.emailId LIKE '%' + @SearchTerm + '%')
+		WHERE (@SearchTerm IS NULL OR u.fullName LIKE '%' + @SearchTerm + '%')
 			AND (@RoleId IS NULL OR c.roleId = @RoleId);
 
 		SELECT u.userId, u.fullName, c.emailId, u.mobileNumber, c.roleId,
@@ -882,7 +882,7 @@ BEGIN
 		INNER JOIN tmsCredential c ON u.userId = c.userId
 		INNER JOIN tmsRole r ON c.roleId = r.roleId
 		INNER JOIN tmsDepartment d ON u.departmentId = d.departmentId
-		WHERE (@SearchTerm IS NULL OR u.fullName LIKE '%' + @SearchTerm + '%' OR c.emailId LIKE '%' + @SearchTerm + '%')
+		WHERE (@SearchTerm IS NULL OR u.fullName LIKE '%' + @SearchTerm + '%')
 			AND (@RoleId IS NULL OR c.roleId = @RoleId)
 		ORDER BY
 			CASE WHEN @SortColumn = 'FullName' AND @SortDirection = 'ASC' THEN u.fullName END ASC,

@@ -2590,3 +2590,18 @@ body.auth-page {
     transform: translateX(calc((100% - 6px) / 3 * 2));
 }
 
+/* ====== List Pagination ====== */
+.page-buttons {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.page-buttons .page-btn {
+    min-width: 34px;
+}
+
+/* ====== Select2 in Table Cells ====== */
+.assign-user + .select2-container {
+    min-width: 130px;
+}
+

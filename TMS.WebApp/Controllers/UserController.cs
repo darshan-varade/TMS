@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using TMS.DataAccess.DAL;
@@ -9,32 +10,56 @@ namespace TMS.WebApp.Controllers
     [AuthorizeRole(Role.Administrator)]
     public class UserController : BaseController
     {
-        public ActionResult Index(int? page, string searchTerm, int? roleId, string sortColumn, string sortDirection)
+        public ActionResult Index()
         {
             ViewBag.Title = "Users";
-            UserDAL dal = new UserDAL();
             MasterDataDAL master = new MasterDataDAL();
+            ViewBag.Roles = new SelectList(master.GetRoles(), "Id", "Name");
+            ViewBag.CurrentUserId = CurrentUserId;
+            return View(new UserListViewModel());
+        }
 
-            int pageNumber = page ?? 1;
-            if (string.IsNullOrEmpty(sortColumn)) sortColumn = "CreatedOn";
-            if (string.IsNullOrEmpty(sortDirection)) sortDirection = "DESC";
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Index")]
+        public ActionResult IndexPost(UserListViewModel vm)
+        {
+            UserDAL dal = new UserDAL();
+
+            int pageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
+            vm.PageSize = vm.PageSize <= 0 ? 10 : vm.PageSize;
+            if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
+            if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
 
             int totalRows;
-            var vm = new UserListViewModel
-            {
-                Users = dal.GetUserList(searchTerm, roleId, sortColumn, sortDirection, pageNumber, 10, out totalRows),
-                TotalRows = totalRows,
-                PageNumber = pageNumber,
-                PageSize = 10,
-                SearchTerm = searchTerm,
-                RoleId = roleId,
-                SortColumn = sortColumn,
-                SortDirection = sortDirection
-            };
+            vm.Users = dal.GetUserList(vm.SearchTerm, vm.RoleId, vm.SortColumn, vm.SortDirection, pageNumber, vm.PageSize, out totalRows);
+            vm.TotalRows = totalRows;
+            vm.PageNumber = pageNumber;
 
-            ViewBag.Roles = new SelectList(master.GetRoles(), "Id", "Name", roleId);
+            ViewBag.Roles = new SelectList(new MasterDataDAL().GetRoles(), "Id", "Name", vm.RoleId);
             ViewBag.CurrentUserId = CurrentUserId;
-            return View(vm);
+            return PartialView("_UserListPartial", vm);
+        }
+
+        [HttpGet]
+        public JsonResult UserSearch(string term)
+        {
+            try
+            {
+                int total;
+                var users = new UserDAL().GetUserList(term ?? "", null, "CreatedOn", "ASC", 1, 20, out total);
+                var results = users.Select(u => new
+                {
+                    id = u.UserId,
+                    text = u.FullName
+                });
+                return Json(results, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error in UserSearch");
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult Create()

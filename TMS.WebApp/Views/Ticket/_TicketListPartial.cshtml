@@ -1,0 +1,90 @@
+@model TMS.DataAccess.ViewModels.TicketListViewModel
+@{
+    bool isAdmin = (bool)ViewBag.IsAdmin;
+    bool isSupport = (bool)ViewBag.IsSupport;
+    bool isEmployee = (bool)ViewBag.IsEmployee;
+    int currentUserId = (int)ViewBag.CurrentUserId;
+    var supportUsers = (SelectList)ViewBag.SupportUsers;
+}
+
+<input type="hidden" id="TotalRows" value="@Model.TotalRows" />
+
+<table class="table table-hover mb-0">
+    <thead class="table-light">
+        <tr>
+            <th class="sortable" data-column="TicketNumber">Ticket <span class="sort-icon"></span></th>
+            <th class="sortable" data-column="Title">Title <span class="sort-icon"></span></th>
+            <th>Category</th>
+            @if (!isEmployee)
+            {
+                <th class="sortable" data-column="PriorityName">Priority <span class="sort-icon"></span></th>
+            }
+            <th class="sortable" data-column="StatusName">Status <span class="sort-icon"></span></th>
+            @if (!isEmployee)
+            {
+                <th>Created By</th>
+            }
+            <th>Assigned To</th>
+            @if (!isEmployee)
+            {
+                <th>Messages</th>
+            }
+            <th class="sortable" data-column="CreatedOn">Created <span class="sort-icon"></span></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Tickets != null && Model.Tickets.Any())
+        {
+            foreach (var t in Model.Tickets)
+            {
+                <tr>
+                    <td><a href="@Url.Action("Details", new { id = t.TicketId })">@t.TicketNumber</a></td>
+                    <td>@t.Title</td>
+                    <td>@t.CategoryName</td>
+                    @if (!isEmployee)
+                    {
+                        <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span></td>
+                    }
+                    <td><span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span></td>
+                    @if (!isEmployee)
+                    {
+                        <td>@t.CreatedByName</td>
+                    }
+                    <td>
+                        @if (isAdmin)
+                        {
+                            <select class="form-select form-select-sm assign-user" data-ticketid="@t.TicketId" data-orig="@(t.AssignedToUserId.HasValue ? t.AssignedToUserId.Value.ToString() : "")" title="Assign support executive">
+                                <option value="">-- Unassigned --</option>
+                                @foreach (var u in supportUsers)
+                                {
+                                    <option value="@u.Value" @(t.AssignedToUserId.HasValue && t.AssignedToUserId.Value.ToString() == u.Value ? "selected" : "")>@u.Text</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            @(t.AssignedToName ?? "-")
+                        }
+                    </td>
+                    @if (!isEmployee)
+                    {
+                        <td><span class="badge bg-light text-dark">@t.ConversationCount</span></td>
+                    }
+                    <td>@t.CreatedOn.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <a href="@Url.Action("Details", new { id = t.TicketId })" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                        @if (isAdmin || (isEmployee && t.CreatedBy == currentUserId && !t.AssignedToUserId.HasValue))
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-ticket" data-ticketid="@t.TicketId" data-title="@t.Title"><i class="bi bi-trash"></i></button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="@(isEmployee ? 7 : 10)" class="text-center text-muted py-4">No tickets found.@(!isSupport ? " <a href=\"" + Url.Action("Create") + "\">Raise a ticket</a>" : "")</td></tr>
+        }
+    </tbody>
+</table>
