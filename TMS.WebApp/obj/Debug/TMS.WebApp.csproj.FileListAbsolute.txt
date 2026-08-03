@@ -124,6 +124,6 @@ D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\T
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\bin\Microsoft.IdentityModel.Logging.xml
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\bin\Microsoft.IdentityModel.Tokens.xml
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\bin\System.IdentityModel.Tokens.Jwt.xml
+D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\obj\Debug\TMS.WebApp.csprojResolveAssemblyReference.cache
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\obj\Debug\TMS.WebApp.dll
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\obj\Debug\TMS.WebApp.pdb
-D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.WebApp\obj\Debug\TMS.WebApp.csprojResolveAssemblyReference.cache

@@ -12,9 +12,11 @@ namespace TMS.DataAccess.ViewModels
         public string Description { get; set; }
 
         [Required(ErrorMessage = "Category is required")]
+        [Display(Name = "Category")]
         public int CategoryId { get; set; }
 
         [Required(ErrorMessage = "Priority is required")]
+        [Display(Name = "Priority")]
         public int PriorityId { get; set; }
 
         public List<DropdownViewModel> Categories { get; set; }

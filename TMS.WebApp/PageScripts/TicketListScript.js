@@ -36,7 +36,8 @@ $(function () {
     function initAssignSelect2() {
         $('.assign-user').select2({
             width: '100%',
-            minimumResultsForSearch: 5,
+            placeholder: '-- Unassigned --',
+            allowClear: false,
             dropdownParent: $('body')
         });
     }

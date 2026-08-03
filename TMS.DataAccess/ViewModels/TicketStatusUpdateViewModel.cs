@@ -8,9 +8,11 @@ namespace TMS.DataAccess.ViewModels
         public string TicketNumber { get; set; }
 
         [Required(ErrorMessage = "Please select a status")]
+        [Display(Name = "Status")]
         public int StatusId { get; set; }
 
         [Required(ErrorMessage = "Please select a priority")]
+        [Display(Name = "Priority")]
         public int PriorityId { get; set; }
 
         public List<DropdownViewModel> Statuses { get; set; }

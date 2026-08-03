@@ -20,6 +20,6 @@ D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\T
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\bin\Debug\Microsoft.Practices.ObjectBuilder2.dll
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\bin\Debug\Serilog.dll
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\bin\Debug\Serilog.xml
+D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\obj\Debug\TMS.DataAccess.csprojResolveAssemblyReference.cache
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\obj\Debug\TMS.DataAccess.dll
 D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\obj\Debug\TMS.DataAccess.pdb
-D:\OneDrive - Rheal Software Pvt Ltd\Documents\Visual Studio 2015\Projects\TMS\TMS.DataAccess\obj\Debug\TMS.DataAccess.csprojResolveAssemblyReference.cache
