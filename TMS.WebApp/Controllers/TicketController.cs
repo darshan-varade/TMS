@@ -373,6 +373,11 @@ namespace TMS.WebApp.Controllers
                     return Json(new { success = false, message = "You do not have access to this ticket." });
                 }
 
+                if (IsSupport && ticket.AssignedToUserId != CurrentUserId)
+                {
+                    return Json(new { success = false, message = "You can only update tickets assigned to you." });
+                }
+
                 dal.UpdateTicketStatus(vm.TicketId, vm.StatusId, vm.PriorityId, CurrentUserId);
                 return Json(new { success = true, message = "Ticket status updated successfully." });
             }
