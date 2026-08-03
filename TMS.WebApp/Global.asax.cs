@@ -68,5 +68,38 @@ namespace TMS.WebApp
         {
             Log.CloseAndFlush();
         }
+
+        protected void Application_Error()
+        {
+            Exception ex = Server.GetLastError();
+            if (ex == null) return;
+
+            var httpEx = ex as HttpException;
+            if (httpEx != null && httpEx.GetHttpCode() == 404)
+            {
+                Server.ClearError();
+                Response.Redirect("~/Error/NotFound");
+                return;
+            }
+
+            Log.Error(ex, "Unhandled application error");
+
+            Server.ClearError();
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+                (Request.Headers["Accept"]?.Contains("application/json") ?? false))
+            {
+                Response.Clear();
+                Response.StatusCode = 200;
+                Response.ContentType = "application/json";
+                Response.Write(new System.Web.Script.Serialization.JavaScriptSerializer()
+                    .Serialize(new { success = false, message = "Something went wrong. Please try again." }));
+                Response.End();
+            }
+            else
+            {
+                Response.Redirect("~/Error");
+            }
+        }
     }
 }

@@ -29,13 +29,13 @@ namespace TMS.DataAccess.DAL
                 {
                     if (reader.Read())
                     {
-                        vm.TotalTickets = Convert.ToInt32(reader["TotalTickets"]);
-                        vm.OpenTickets = Convert.ToInt32(reader["OpenTickets"]);
-                        vm.InProgressTickets = Convert.ToInt32(reader["InProgressTickets"]);
-                        vm.ResolvedTickets = Convert.ToInt32(reader["ResolvedTickets"]);
-                        vm.ClosedTickets = Convert.ToInt32(reader["ClosedTickets"]);
-                        vm.MyAssignedTickets = Convert.ToInt32(reader["MyAssignedTickets"]);
-                        vm.MyCreatedTickets = Convert.ToInt32(reader["MyCreatedTickets"]);
+                        vm.TotalTickets = reader["TotalTickets"] != DBNull.Value ? Convert.ToInt32(reader["TotalTickets"]) : 0;
+                        vm.OpenTickets = reader["OpenTickets"] != DBNull.Value ? Convert.ToInt32(reader["OpenTickets"]) : 0;
+                        vm.InProgressTickets = reader["InProgressTickets"] != DBNull.Value ? Convert.ToInt32(reader["InProgressTickets"]) : 0;
+                        vm.ResolvedTickets = reader["ResolvedTickets"] != DBNull.Value ? Convert.ToInt32(reader["ResolvedTickets"]) : 0;
+                        vm.ClosedTickets = reader["ClosedTickets"] != DBNull.Value ? Convert.ToInt32(reader["ClosedTickets"]) : 0;
+                        vm.MyAssignedTickets = reader["MyAssignedTickets"] != DBNull.Value ? Convert.ToInt32(reader["MyAssignedTickets"]) : 0;
+                        vm.MyCreatedTickets = reader["MyCreatedTickets"] != DBNull.Value ? Convert.ToInt32(reader["MyCreatedTickets"]) : 0;
                     }
                 }
             }

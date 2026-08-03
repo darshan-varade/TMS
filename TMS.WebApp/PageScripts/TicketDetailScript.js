@@ -20,6 +20,11 @@ $(function () {
         actionModal.show();
         $.get(url, { id: ticketId })
             .done(function (html) {
+                if (html && html.success === false) {
+                    actionModal.hide();
+                    showToast(html.message || 'Something went wrong. Please try again.', 'error');
+                    return;
+                }
                 actionModalContent.html(html);
                 initModalSelect2();
                 var form = actionModalContent.find('form');

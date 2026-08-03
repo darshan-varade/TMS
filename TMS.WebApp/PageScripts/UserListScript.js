@@ -56,6 +56,10 @@ $(function () {
             type: 'POST',
             data: $('#searchForm').serialize(),
             success: function (result) {
+                if (result && result.success === false) {
+                    showToast(result.message || 'Something went wrong. Please try again.', 'error');
+                    return;
+                }
                 $('#resultContainer').html(result);
                 updateSortIcons();
 
@@ -81,9 +85,7 @@ $(function () {
                 SaveFilterState();
             },
             error: function (xhr, status, error) {
-                $('#resultContainer').html(
-                    '<div class="alert alert-danger m-3">Error loading data: ' + error + '</div>'
-                );
+                showToast('Something went wrong. Please try again.', 'error');
             }
         });
     }

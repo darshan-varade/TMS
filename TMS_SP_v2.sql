@@ -1164,10 +1164,10 @@ BEGIN
 			@ResolvedTickets INT, @ClosedTickets INT, @MyAssignedTickets INT, @MyCreatedTickets INT;
 
 		SELECT @TotalTickets = COUNT(*),
-			@OpenTickets = SUM(CASE WHEN s.statusName = 'New' THEN 1 ELSE 0 END),
-			@InProgressTickets = SUM(CASE WHEN s.statusName = 'In Progress' THEN 1 ELSE 0 END),
-			@ResolvedTickets = SUM(CASE WHEN s.statusName = 'Resolved' THEN 1 ELSE 0 END),
-			@ClosedTickets = SUM(CASE WHEN s.statusName = 'Closed' THEN 1 ELSE 0 END)
+			@OpenTickets = ISNULL(SUM(CASE WHEN s.statusName = 'New' THEN 1 ELSE 0 END), 0),
+			@InProgressTickets = ISNULL(SUM(CASE WHEN s.statusName = 'In Progress' THEN 1 ELSE 0 END), 0),
+			@ResolvedTickets = ISNULL(SUM(CASE WHEN s.statusName = 'Resolved' THEN 1 ELSE 0 END), 0),
+			@ClosedTickets = ISNULL(SUM(CASE WHEN s.statusName = 'Closed' THEN 1 ELSE 0 END), 0)
 		FROM tmsTicket t
 		LEFT JOIN tmsStatus s ON t.statusId = s.statusId
 		WHERE t.IsActive = 1
