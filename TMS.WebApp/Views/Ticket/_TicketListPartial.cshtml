@@ -9,7 +9,7 @@
 
 <input type="hidden" id="TotalRows" value="@Model.TotalRows" />
 
-<table class="table table-hover align-middle mb-0">
+<table class="table table-hover align-middle mb-0 table-card-responsive">
     <thead class="table-light">
         <tr>
             <th class="ps-3 sortable" data-column="TicketNumber">Ticket <span class="sort-icon"></span></th>
@@ -39,28 +39,30 @@
             foreach (var t in Model.Tickets)
             {
                 <tr>
-                    <td class="ps-3"><a href="@Url.Action("Details", new { id = t.TicketId })" class="fw-semibold text-decoration-none">@t.TicketNumber</a></td>
-                    <td class="fw-medium">@t.Title</td>
-                    <td>@t.CategoryName</td>
+                    <td class="ps-3" data-label="Ticket"><a href="@Url.Action("Details", new { id = t.TicketId })" class="fw-semibold text-decoration-none">@t.TicketNumber</a></td>
+                    <td class="fw-medium" data-label="Title">@t.Title</td>
+                    <td data-label="Category">@t.CategoryName</td>
                     @if (!isEmployee)
                     {
-                        <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span></td>
+                        <td data-label="Priority"><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span></td>
                     }
-                    <td><span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span></td>
+                    <td data-label="Status"><span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span></td>
                     @if (!isEmployee)
                     {
-                        <td>@t.CreatedByName</td>
+                        <td data-label="Created By">@t.CreatedByName</td>
                     }
-                    <td>
+                    <td data-label="Assigned To">
                         @if (isAdmin)
                         {
-                            <select class="form-select form-select-sm assign-user" data-ticketid="@t.TicketId" data-orig="@(t.AssignedToUserId.HasValue ? t.AssignedToUserId.Value.ToString() : "")" title="Assign support executive">
-                                <option value="">-- Unassigned --</option>
-                                @foreach (var u in supportUsers)
-                                {
-                                    <option value="@u.Value" @(t.AssignedToUserId.HasValue && t.AssignedToUserId.Value.ToString() == u.Value ? "selected" : "")>@u.Text</option>
-                                }
-                            </select>
+                            <div class="cell-value">
+                                <select class="form-select form-select-sm assign-user" data-ticketid="@t.TicketId" data-orig="@(t.AssignedToUserId.HasValue ? t.AssignedToUserId.Value.ToString() : "")" title="Assign support executive">
+                                    <option value="">-- Unassigned --</option>
+                                    @foreach (var u in supportUsers)
+                                    {
+                                        <option value="@u.Value" @(t.AssignedToUserId.HasValue && t.AssignedToUserId.Value.ToString() == u.Value ? "selected" : "")>@u.Text</option>
+                                    }
+                                </select>
+                            </div>
                         }
                         else
                         {
@@ -69,10 +71,10 @@
                     </td>
                     @if (!isEmployee)
                     {
-                        <td class="text-center"><span class="badge bg-light">@t.ConversationCount</span></td>
+                        <td class="text-center" data-label="Messages"><span class="badge bg-light">@t.ConversationCount</span></td>
                     }
-                    <td class="text-secondary" style="font-size: 0.9rem;">@t.CreatedOn.ToString("dd MMM yyyy")</td>
-                    <td class="pe-3 text-end" style="white-space: nowrap;">
+                    <td class="text-secondary" data-label="Created" style="font-size: 0.9rem;">@t.CreatedOn.ToString("dd MMM yyyy")</td>
+                    <td class="pe-3 text-end td-actions" style="white-space: nowrap;">
                         <a href="@Url.Action("Details", new { id = t.TicketId })" class="btn btn-sm btn-outline-primary py-1 px-2" title="View Details"><i class="bi bi-eye"></i></a>
                         @if (isAdmin || (isEmployee && t.CreatedBy == currentUserId && !t.AssignedToUserId.HasValue))
                         {
@@ -84,7 +86,7 @@
         }
         else
         {
-            <tr><td colspan="@(isEmployee ? 7 : 10)" class="text-center text-muted py-4">No tickets found.@(!isSupport ? " <a href=\"" + Url.Action("Create") + "\">Raise a ticket</a>" : "")</td></tr>
+            <tr><td colspan="@(isEmployee ? 7 : 10)" class="text-center text-muted py-4">No tickets found.</td></tr>
         }
     </tbody>
 </table>

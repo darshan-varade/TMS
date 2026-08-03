@@ -5,7 +5,7 @@
     bool myAssignedOnly = (bool)ViewBag.MyAssignedOnly;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
         <h2 class="fw-bold mb-1">@(myAssignedOnly ? "My Assigned Tickets" : "Tickets")</h2>
         <p class="text-secondary mb-0" style="font-size: 0.9rem;">View and manage the ticketing lifecycle</p>

@@ -49,7 +49,7 @@
         : timelineItems.OrderBy(t => t.Date).ToList();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div class="breadcrumb-jira mb-0">
         <a href="@Url.Action("Index")"><i class="bi bi-arrow-left"></i> Back to tickets</a>
         <span class="mx-2 text-muted">/</span>
@@ -74,8 +74,73 @@
 <div class="ticket-header-title">@Model.Title</div>
 
 <div class="row g-4">
-    <!-- Left Main Column -->
-    <div class="col-lg-8 col-xl-9">
+    <!-- Right Sidebar Column (shows at top on mobile, on right on lg screens) -->
+    <div class="col-lg-4 col-xl-3 order-lg-2">
+        <!-- Quick Assign / Status Buttons -->
+        <div class="mb-3 d-grid gap-2">
+            @if (isAdmin)
+            {
+                <button type="button" class="btn btn-outline-success w-100 py-2 fw-semibold" data-action="assign" data-ticket-id="@Model.TicketId"><i class="bi bi-person-check"></i> Assign Ticket</button>
+            }
+            @if (canManageTicket)
+            {
+                <button type="button" class="btn btn-outline-primary w-100 py-2 fw-semibold" data-action="updatestatus" data-ticket-id="@Model.TicketId"><i class="bi bi-arrow-repeat"></i> Update Status</button>
+            }
+        </div>
+
+        <!-- Sidebar Details panel -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Details</h6></div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="width: 45%; font-size: 0.85rem;">Status</th>
+                            <td class="pe-0 text-end">
+                                <span class="badge @(Model.StatusName == "Closed" ? "bg-success" : Model.StatusName == "Resolved" ? "bg-info" : Model.StatusName == "In Progress" ? "bg-primary" : Model.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@Model.StatusName</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Priority</th>
+                            <td class="pe-0 text-end">
+                                <span class="badge @(Model.PriorityName == "Critical" ? "bg-danger" : Model.PriorityName == "High" ? "bg-warning" : Model.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@Model.PriorityName</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Category</th>
+                            <td class="pe-0 text-end fw-semibold text-dark" style="font-size: 0.875rem;">@Model.CategoryName</td>
+                        </tr>
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Assignee</th>
+                            <td class="pe-0 text-end fw-medium" style="font-size: 0.875rem;">@(Model.AssignedToName ?? "Unassigned")</td>
+                        </tr>
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Reporter</th>
+                            <td class="pe-0 text-end fw-medium" style="font-size: 0.875rem;">@Model.CreatedByName</td>
+                        </tr>
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Due Date</th>
+                            <td class="pe-0 text-end text-muted" style="font-size: 0.825rem;">@Model.DueDate.ToString("dd MMM yyyy HH:mm")</td>
+                        </tr>
+                        @if (Model.ResolvedOn.HasValue)
+                        {
+                            <tr>
+                                <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Resolved On</th>
+                                <td class="pe-0 text-end text-muted" style="font-size: 0.825rem;">@Model.ResolvedOn.Value.ToString("dd MMM yyyy HH:mm")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Created</th>
+                            <td class="pe-0 text-end text-muted" style="font-size: 0.825rem;">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Left Main Column (shows below sidebar details on mobile, on left on lg screens) -->
+    <div class="col-lg-8 col-xl-9 order-lg-1">
         <!-- Key Details Card -->
         <div class="key-details-card mb-4">
             <div class="key-details-header p-3 d-flex align-items-center gap-3">
@@ -98,7 +163,7 @@
         <!-- Attachments JSM Section -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Attachments <span class="badge bg-secondary-light text-secondary ms-1">@(Model.Attachments != null ? Model.Attachments.Count : 0)</span></h6>
+                <h6 class="mb-0">Attachments <span class="badge bg-light text-secondary border ms-1">@(Model.Attachments != null ? Model.Attachments.Count : 0)</span></h6>
             </div>
             <div class="card-body">
                 @if (Model.Attachments != null && Model.Attachments.Any())
@@ -210,17 +275,17 @@
                                     <textarea name="comment" id="commentTextarea" class="form-control border-0 p-0" rows="3" placeholder="Type your comment..." style="box-shadow: none !important; resize: none; font-size: 0.925rem;" required></textarea>
                                 </div>
                                 
-                                <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--border) !important;">
-                                    <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center justify-content-between pt-2 border-top flex-wrap gap-2" style="border-color: var(--border) !important;">
+                                    <div class="d-flex align-items-center gap-2" style="min-width: 0;">
                                         <label class="btn btn-link text-muted p-1 m-0" style="cursor: pointer;" title="Attach file">
                                             <i class="bi bi-paperclip fs-5"></i>
                                             <input type="file" name="file" class="d-none" onchange="handleCommentFileChange(this)" />
                                         </label>
-                                        <span id="commentFileName" class="text-muted small text-truncate" style="max-width: 180px;"></span>
+                                        <span id="commentFileName" class="text-muted small text-truncate" style="max-width: 140px;"></span>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1.5" onclick="collapseCommentEditor()">Cancel</button>
-                                        <button type="submit" class="btn btn-sm btn-primary px-3 py-1.5">Save</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-2" onclick="collapseCommentEditor()">Cancel</button>
+                                        <button type="submit" class="btn btn-sm btn-primary px-3 py-2">Save</button>
                                     </div>
                                 </div>
                             </form>
@@ -243,7 +308,7 @@
                                             @GetInitials(c.CreatedByName)
                                         </div>
                                         <div class="flex-grow-1">
-                                            <div class="d-flex align-items-center gap-2">
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
                                                 <span class="fw-semibold text-dark">@c.CreatedByName</span>
                                                 <span class="text-muted small">@c.CreatedOn.ToString("dd MMM yyyy HH:mm")</span>
                                                 @if (c.IsInternal)
@@ -264,22 +329,22 @@
                                                         var cFileType = System.IO.Path.GetExtension(att.OriginalFileName);
                                                         <div class="attachment-item-card attachment-preview" data-preview-url="@cPreviewUrl" data-download-url="@cDownloadUrl" data-filename="@att.OriginalFileName" data-filesize="@(att.FileSize / 1024) KB" data-filetype="@cFileType">
                                                             <div class="attachment-item-preview">
-                                                                @if (att.OriginalFileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
-                                                                     att.OriginalFileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) || 
-                                                                     att.OriginalFileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || 
-                                                                     att.OriginalFileName.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
-                                                                     att.OriginalFileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
-                                                                {
-                                                                    <img src="@cDownloadUrl" alt="@att.OriginalFileName" />
-                                                                }
-                                                                else if (att.OriginalFileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-                                                                {
-                                                                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-1"></i>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <i class="bi bi-file-earmark-text text-secondary fs-1"></i>
-                                                                }
+                                                                 @if (att.OriginalFileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
+                                                                      att.OriginalFileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) || 
+                                                                      att.OriginalFileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || 
+                                                                      att.OriginalFileName.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
+                                                                      att.OriginalFileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                                                                 {
+                                                                     <img src="@cDownloadUrl" alt="@att.OriginalFileName" />
+                                                                 }
+                                                                 else if (att.OriginalFileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                                                                 {
+                                                                     <i class="bi bi-file-earmark-pdf-fill text-danger fs-1"></i>
+                                                                 }
+                                                                 else
+                                                                 {
+                                                                     <i class="bi bi-file-earmark-text text-secondary fs-1"></i>
+                                                                 }
                                                             </div>
                                                             <div class="attachment-item-meta">
                                                                 <span class="attachment-item-name" title="@att.OriginalFileName">@att.OriginalFileName</span>
@@ -311,14 +376,14 @@
                                             <div class="activity-content mt-2 small">
                                                 @if (!string.IsNullOrEmpty(a.Remarks))
                                                 {
-                                                    <div class="text-muted italic mb-1">@a.Remarks</div>
+                                                    <div class="text-muted fst-italic mb-1">@a.Remarks</div>
                                                 }
                                                 @if (!string.IsNullOrEmpty(a.OldValue) && !string.IsNullOrEmpty(a.NewValue))
                                                 {
-                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                                                         <span class="badge bg-light text-secondary border px-2 py-1">@a.OldValue</span>
                                                         <i class="bi bi-arrow-right text-muted"></i>
-                                                        <span class="badge bg-primary-light text-primary border border-primary-subtle px-2 py-1">@a.NewValue</span>
+                                                        <span class="badge bg-primary-light text-primary border border-primary px-2 py-1">@a.NewValue</span>
                                                     </div>
                                                 }
                                             </div>
@@ -333,71 +398,6 @@
                         <p class="text-muted small text-center my-4">No activity or comments recorded yet.</p>
                     }
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Sidebar Column -->
-    <div class="col-lg-4 col-xl-3">
-        <!-- Quick Assign / Status Buttons -->
-        <div class="mb-3 d-grid gap-2">
-            @if (isAdmin)
-            {
-                <button type="button" class="btn btn-outline-success w-100 py-2 fw-semibold" data-action="assign" data-ticket-id="@Model.TicketId"><i class="bi bi-person-check"></i> Assign Ticket</button>
-            }
-            @if (canManageTicket)
-            {
-                <button type="button" class="btn btn-outline-primary w-100 py-2 fw-semibold" data-action="updatestatus" data-ticket-id="@Model.TicketId"><i class="bi bi-arrow-repeat"></i> Update Status</button>
-            }
-        </div>
-
-        <!-- Sidebar Details panel -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header"><h6 class="mb-0">Details</h6></div>
-            <div class="card-body">
-                <table class="table table-sm table-borderless mb-0">
-                    <tbody>
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="width: 45%; font-size: 0.85rem;">Status</th>
-                            <td class="pe-0 text-end">
-                                <span class="badge @(Model.StatusName == "Closed" ? "bg-success" : Model.StatusName == "Resolved" ? "bg-info" : Model.StatusName == "In Progress" ? "bg-primary" : Model.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@Model.StatusName</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Priority</th>
-                            <td class="pe-0 text-end">
-                                <span class="badge @(Model.PriorityName == "Critical" ? "bg-danger" : Model.PriorityName == "High" ? "bg-warning" : Model.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@Model.PriorityName</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Category</th>
-                            <td class="pe-0 text-end fw-semibold text-dark" style="font-size: 0.875rem;">@Model.CategoryName</td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Assignee</th>
-                            <td class="pe-0 text-end fw-medium" style="font-size: 0.875rem;">@(Model.AssignedToName ?? "Unassigned")</td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Reporter</th>
-                            <td class="pe-0 text-end fw-medium" style="font-size: 0.875rem;">@Model.CreatedByName</td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Due Date</th>
-                            <td class="pe-0 text-end text-muted" style="font-size: 0.825rem;">@Model.DueDate.ToString("dd MMM yyyy HH:mm")</td>
-                        </tr>
-                        @if (Model.ResolvedOn.HasValue)
-                        {
-                            <tr>
-                                <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Resolved On</th>
-                                <td class="pe-0 text-end text-muted" style="font-size: 0.825rem;">@Model.ResolvedOn.Value.ToString("dd MMM yyyy HH:mm")</td>
-                            </tr>
-                        }
-                        <tr>
-                            <th class="ps-0 text-muted fw-semibold" style="font-size: 0.85rem;">Created</th>
-                            <td class="pe-0 text-end text-muted" style="font-size: 0.825rem;">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>

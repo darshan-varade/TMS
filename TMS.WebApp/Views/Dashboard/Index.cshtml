@@ -1,6 +1,34 @@
 @model TMS.DataAccess.ViewModels.DashboardViewModel
+@using System.Linq
 @{
     ViewBag.Title = "Dashboard";
+    bool isAdmin = User.IsInRole("Administrator");
+    bool isSupport = User.IsInRole("Support Executive");
+    bool isEmployee = User.IsInRole("Employee");
+}
+
+@functions {
+    public string GetRelativeTime(DateTime dt)
+    {
+        var span = DateTime.Now - dt;
+        if (span.TotalDays > 365) return (int)(span.TotalDays / 365) + " years ago";
+        if (span.TotalDays > 30) return (int)(span.TotalDays / 30) + " months ago";
+        if (span.TotalDays >= 2) return (int)span.TotalDays + " days ago";
+        if (span.TotalDays >= 1) return "Yesterday";
+        if (span.TotalHours >= 2) return (int)span.TotalHours + " hours ago";
+        if (span.TotalHours >= 1) return "1 hour ago";
+        if (span.TotalMinutes >= 2) return (int)span.TotalMinutes + " minutes ago";
+        if (span.TotalMinutes >= 1) return "1 minute ago";
+        return "Just now";
+    }
+
+    public string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "U";
+        var parts = fullName.Trim().Split(' ');
+        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+        return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
+    }
 }
 
 <div class="dashboard-container">
@@ -9,97 +37,374 @@
         <p class="text-secondary mb-0">Welcome back, <span class="fw-semibold text-primary">@User.Identity.Name</span></p>
     </div>
 
-    <div class="row g-4 mt-2">
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card">
-                <div class="stat-icon bg-primary-light">
-                    <i class="bi bi-ticket-detailed"></i>
-                </div>
-                <div>
-                    <p class="stat-label">Total Tickets</p>
-                    <h3 class="stat-value">@Model.TotalTickets</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card">
-                <div class="stat-icon bg-warning-light">
-                    <i class="bi bi-envelope-open"></i>
-                </div>
-                <div>
-                    <p class="stat-label">Open</p>
-                    <h3 class="stat-value text-warning">@Model.OpenTickets</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card">
-                <div class="stat-icon bg-info-light">
-                    <i class="bi bi-clock-history"></i>
-                </div>
-                <div>
-                    <p class="stat-label">In Progress</p>
-                    <h3 class="stat-value text-info">@Model.InProgressTickets</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card">
-                <div class="stat-icon bg-success-light">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <div>
-                    <p class="stat-label">Closed</p>
-                    <h3 class="stat-value text-success">@Model.ClosedTickets</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mt-3">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header border-0 pb-0" style="background: transparent;">
-                    <h6 class="mb-0 fw-bold">Tickets by Status</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="statusChart" height="220"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header border-0 pb-0" style="background: transparent;">
-                    <h6 class="mb-0 fw-bold">Tickets by Priority</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="priorityChart" height="220"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @if (User.IsInRole("Administrator"))
+    @if (isAdmin)
     {
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header border-0 d-flex justify-content-between align-items-center py-3" style="background: transparent;">
-                        <h6 class="mb-0 fw-bold">Unassigned Tickets</h6>
-                        <a href="@Url.Action("Index", "Ticket")" class="btn btn-sm btn-outline-primary py-1 px-3">View All</a>
+        <!-- ================= ADMIN JSM-THEMED DASHBOARD ================= -->
+        <!-- Top Metrics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="jsm-stat-card shadow-sm">
+                    <div class="jsm-stat-icon completed">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">@Model.CompletedLast7Days</h3>
+                        <span class="text-secondary small text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.72rem;">completed</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="jsm-stat-card shadow-sm">
+                    <div class="jsm-stat-icon updated">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">@Model.UpdatedLast7Days</h3>
+                        <span class="text-secondary small text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.72rem;">updated</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="jsm-stat-card shadow-sm">
+                    <div class="jsm-stat-icon created">
+                        <i class="bi bi-plus-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">@Model.CreatedLast7Days</h3>
+                        <span class="text-secondary small text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.72rem;">created</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="jsm-stat-card shadow-sm">
+                    <div class="jsm-stat-icon due-soon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">@Model.DueSoonNext7Days</h3>
+                        <span class="text-secondary small text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.72rem;">due soon</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Status Overview & Priority Breakdown -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="jsm-card shadow-sm h-100 mb-0">
+                    <div class="jsm-card-header">
+                        <h6 class="jsm-card-title">Status overview</h6>
+                        <div class="jsm-card-subtitle">Get a snapshot of the status of your work items. <a href="@Url.Action("Index", "Ticket")">View all work items</a></div>
+                    </div>
+                    <div class="jsm-card-body">
+                        <div class="row align-items-center">
+                            <div class="col-6 position-relative d-flex justify-content-center align-items-center" style="height: 180px;">
+                                <canvas id="statusChart" style="max-height: 160px; max-width: 160px;"></canvas>
+                                <div class="position-absolute text-center" style="pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                    <h3 class="fw-bold mb-0" style="font-size: 1.6rem; line-height: 1;">@Model.StatusChart.Sum(s => s.Value)</h3>
+                                    <span class="text-secondary d-block" style="font-size: 0.62rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; font-weight: 600;">Total Work<br />Items</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-2" style="font-size: 0.85rem; padding-left: 0;">
+                                    @{
+                                        string[] colors = new string[] { "#6366F1", "#8B5CF6", "#F59E0B", "#10B981", "#EF4444", "#64748B" };
+                                        int idx = 0;
+                                        foreach (var s in Model.StatusChart)
+                                        {
+                                            string color = colors[idx % colors.Length];
+                                            idx++;
+                                            <li class="d-flex justify-content-between align-items-center">
+                                                <span class="text-truncate me-2">
+                                                    <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: @color;"></span>
+                                                    <span class="text-secondary">@s.Label</span>
+                                                </span>
+                                                <span class="fw-bold text-primary">@s.Value</span>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="jsm-card shadow-sm h-100 mb-0">
+                    <div class="jsm-card-header">
+                        <h6 class="jsm-card-title">Priority breakdown</h6>
+                        <div class="jsm-card-subtitle">Get a holistic view of how work is being prioritized. <a href="#">How to manage priorities for spaces</a></div>
+                    </div>
+                    <div class="jsm-card-body d-flex align-items-center justify-content-center" style="height: 220px;">
+                        <canvas id="priorityChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Request Type & Recent Activity -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="jsm-card shadow-sm h-100 mb-0">
+                    <div class="jsm-card-header">
+                        <h6 class="jsm-card-title">Request type</h6>
+                        <div class="jsm-card-subtitle">Open work items by request type. <a href="@Url.Action("Index", "Ticket")">View all work items</a></div>
+                    </div>
+                    <div class="jsm-card-body" style="max-height: 240px; overflow-y: auto;">
+                        <div class="jsm-progress-list">
+                            @if (Model.CategoryDistribution != null && Model.CategoryDistribution.Any(c => c.TicketCount > 0))
+                            {
+                                foreach (var c in Model.CategoryDistribution.OrderByDescending(x => x.TicketCount))
+                                {
+                                    string iconClass = "bi-file-earmark-text";
+                                    if (c.CategoryName.Contains("Hardware")) { iconClass = "bi-laptop"; }
+                                    else if (c.CategoryName.Contains("Software")) { iconClass = "bi-app-indicator"; }
+                                    else if (c.CategoryName.Contains("Network")) { iconClass = "bi-wifi"; }
+                                    else if (c.CategoryName.Contains("Printer")) { iconClass = "bi-printer"; }
+                                    else if (c.CategoryName.Contains("Access")) { iconClass = "bi-shield-lock"; }
+                                    else if (c.CategoryName.Contains("Email")) { iconClass = "bi-envelope"; }
+
+                                    <div class="jsm-progress-item">
+                                        <div class="jsm-progress-label">
+                                            <i class="bi @iconClass text-primary"></i>
+                                            <span>@c.CategoryName</span>
+                                        </div>
+                                        <div class="jsm-progress-track-wrapper">
+                                            <div class="jsm-progress-track">
+                                                <div class="jsm-progress-bar" style="width: @(c.Percentage)%; background-color: #3b82f6;"></div>
+                                            </div>
+                                            <span class="jsm-progress-value text-secondary">@c.TicketCount</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center py-4 text-secondary">
+                                    <i class="bi bi-info-circle d-block fs-3 mb-2"></i>
+                                    No active requests recorded.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="jsm-card shadow-sm h-100 mb-0">
+                    <div class="jsm-card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="jsm-card-title">Recent activity</h6>
+                            <div class="jsm-card-subtitle">Stay up to date with what's happening across the space.</div>
+                        </div>
+                        <a href="@Url.Action("Index", "Ticket")" class="text-secondary hover-primary" title="View All"><i class="bi bi-arrows-fullscreen"></i></a>
+                    </div>
+                    <div class="jsm-card-body" style="max-height: 240px; overflow-y: auto;">
+                        <ul class="jsm-timeline">
+                            @if (Model.RecentActivities != null && Model.RecentActivities.Any())
+                            {
+                                foreach (var a in Model.RecentActivities)
+                                {
+                                    string colorHex = "#4f46e5";
+                                    if (a.ActivityTypeId == 1) { colorHex = "#10b981"; } // Ticket Created
+                                    else if (a.ActivityTypeId == 4) { colorHex = "#ef4444"; } // Status Changed
+                                    else if (a.ActivityTypeId == 7) { colorHex = "#3b82f6"; } // Comment Added
+
+                                    <li class="jsm-timeline-item">
+                                        <div class="jsm-timeline-line"></div>
+                                        <div class="jsm-avatar" style="background-color: @(colorHex); color: white;">
+                                            @GetInitials(a.CreatedByName)
+                                        </div>
+                                        <div class="jsm-timeline-content">
+                                            <div class="jsm-timeline-text">
+                                                <span class="fw-bold text-primary">@a.CreatedByName</span>
+                                                <span>
+                                                    @if (a.ActivityTypeId == 1) { <text>created ticket</text> }
+                                                    else if (a.ActivityTypeId == 2 || a.ActivityTypeId == 3) { <text>assigned ticket</text> }
+                                                    else if (a.ActivityTypeId == 4) { <text>changed status of</text> }
+                                                    else if (a.ActivityTypeId == 5) { <text>updated priority of</text> }
+                                                    else if (a.ActivityTypeId == 7) { <text>commented on</text> }
+                                                    else if (a.ActivityTypeId == 8) { <text>attached a file to</text> }
+                                                    else if (a.ActivityTypeId == 9) { <text>closed ticket</text> }
+                                                    else { <text>updated</text> }
+                                                </span>
+                                                <a href="@Url.Action("Details", "Ticket", new { id = a.TicketId })" class="fw-semibold text-decoration-none">@a.TicketNumber: @a.TicketTitle</a>
+                                                @if (!string.IsNullOrEmpty(a.NewValue))
+                                                {
+                                                    <span class="jsm-timeline-badge">@a.NewValue</span>
+                                                }
+                                            </div>
+                                            <div class="jsm-timeline-time text-muted small">
+                                                @GetRelativeTime(a.CreatedOn)
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="text-center py-4 text-secondary list-unstyled">
+                                    <i class="bi bi-clock-history d-block fs-3 mb-2"></i>
+                                    No recent activities recorded.
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (isSupport)
+    {
+        <!-- ================= SUPPORT EXECUTIVE DASHBOARD ================= -->
+        <!-- Metric Cards Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="jsm-stat-icon completed" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0">@Model.MyAssignedTickets</h3>
+                            <span class="text-secondary small">My Assigned Tickets</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="jsm-stat-icon completed" style="width: 50px; height: 50px; font-size: 1.5rem; background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <i class="bi bi-patch-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0">@Model.ResolvedTickets</h3>
+                            <span class="text-secondary small">Resolved Queue</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="jsm-stat-icon completed" style="width: 50px; height: 50px; font-size: 1.5rem; background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0">@(Model.MyAssignedTickets > 5 ? "High" : "Optimal")</h3>
+                            <span class="text-secondary small">Workload Status</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Queue List -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">My Active Queue</h6>
+                <a href="@Url.Action("Index", "Ticket", new { assignedToUserId = Model.MyAssignedTickets })" class="btn btn-sm btn-outline-primary fw-semibold">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Ticket Number</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created On</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RecentTickets != null && Model.RecentTickets.Any())
+                            {
+                                foreach (var t in Model.RecentTickets)
+                                {
+                                    <tr>
+                                        <td class="ps-4 fw-semibold">@t.TicketNumber</td>
+                                        <td>@t.Title</td>
+                                        <td><span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span></td>
+                                        <td><span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span></td>
+                                        <td>@t.CreatedOn.ToString("MMM dd, yyyy")</td>
+                                        <td class="text-end pe-4">
+                                            <a href="@Url.Action("Details", "Ticket", new { id = t.TicketId })" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-arrow-right"></i> Open
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-secondary">
+                                        <i class="bi bi-check2-all d-block fs-3 mb-2 text-success"></i>
+                                        No tickets in your active queue!
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ================= EMPLOYEE DASHBOARD ================= -->
+        <!-- Welcome Banner CTA -->
+        <div class="normal-welcome-banner text-center text-sm-start d-sm-flex align-items-center justify-content-between p-4 mb-4">
+            <div>
+                <h3 class="fw-bold mb-2">How can we help you today?</h3>
+                <p class="mb-0 opacity-90">Raise a support request, search for help, or track your existing tickets.</p>
+            </div>
+            <div class="mt-3 mt-sm-0">
+                <a href="@Url.Action("Create", "Ticket")" class="btn btn-light fw-bold text-primary shadow-sm">
+                    <i class="bi bi-plus-lg me-2"></i>Create Support Ticket
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Side: Simple Stat Card & Quick links -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h6 class="fw-bold mb-3">My Requests Summary</h6>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-secondary"><i class="bi bi-envelope-open me-2 text-primary"></i>My Created Tickets</span>
+                        <span class="fw-bold fs-5 text-primary">@Model.MyCreatedTickets</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 mt-2">
+                        <span class="text-secondary"><i class="bi bi-patch-check me-2 text-success"></i>Active Requests</span>
+                        <span class="fw-bold fs-5 text-success">@Model.OpenTickets</span>
+                    </div>
+                    <div class="mt-4">
+                        <a href="@Url.Action("Index", "Ticket")" class="btn btn-outline-primary w-100 fw-semibold">
+                            <i class="bi bi-list-task me-2"></i>View All My Requests
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Recent Tickets Raised by Me -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header border-0 pb-0" style="background: transparent;">
+                        <h6 class="mb-0 fw-bold">My Recent Requests</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
+                                <thead>
                                     <tr>
-                                        <th class="ps-3">Ticket #</th>
+                                        <th class="ps-4">Ticket ID</th>
                                         <th>Title</th>
                                         <th>Status</th>
-                                        <th>Priority</th>
-                                        <th>Created By</th>
-                                        <th>Assigned To</th>
-                                        <th class="pe-3">Created</th>
+                                        <th>Created On</th>
+                                        <th class="text-end pe-4">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,23 +413,26 @@
                                         foreach (var t in Model.RecentTickets)
                                         {
                                             <tr>
-                                                <td class="ps-3"><a href="@Url.Action("Details", "Ticket", new { id = t.TicketId })" class="fw-semibold text-decoration-none">@t.TicketNumber</a></td>
+                                                <td class="ps-4 fw-semibold text-primary">@t.TicketNumber</td>
                                                 <td>@t.Title</td>
-                                                <td>
-                                                    <span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span>
+                                                <td><span class="badge @(t.StatusName == "Closed" ? "bg-success" : t.StatusName == "Resolved" ? "bg-info" : t.StatusName == "In Progress" ? "bg-primary" : t.StatusName == "Assigned" ? "bg-warning" : "bg-secondary")">@t.StatusName</span></td>
+                                                <td>@t.CreatedOn.ToString("MMM dd, yyyy")</td>
+                                                <td class="text-end pe-4">
+                                                    <a href="@Url.Action("Details", "Ticket", new { id = t.TicketId })" class="btn btn-sm btn-light">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
                                                 </td>
-                                                <td>
-                                                    <span class="badge @(t.PriorityName == "Critical" ? "bg-danger" : t.PriorityName == "High" ? "bg-warning" : t.PriorityName == "Medium" ? "bg-primary" : "bg-secondary")">@t.PriorityName</span>
-                                                </td>
-                                                <td>@t.CreatedByName</td>
-                                                <td><span class="text-muted">@(t.AssignedToName ?? "-")</span></td>
-                                                <td class="pe-3 text-secondary">@t.CreatedOn.ToString("dd MMM yyyy")</td>
                                             </tr>
                                         }
                                     }
                                     else
                                     {
-                                        <tr><td colspan="7" class="text-center text-muted py-4">No unassigned tickets found</td></tr>
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-secondary">
+                                                <i class="bi bi-info-circle d-block fs-3 mb-2"></i>
+                                                You haven't created any requests yet.
+                                            </td>
+                                        </tr>
                                     }
                                 </tbody>
                             </table>
@@ -140,58 +448,69 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            var statusCtx = document.getElementById('statusChart').getContext('2d');
-            
-            // Generate modern charts styling
-            var chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            color: getComputedStyle(document.body).getPropertyValue('--text-secondary').trim(),
-                            font: {
-                                family: 'Plus Jakarta Sans',
-                                size: 12
-                            },
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
+            var statusCanvas = document.getElementById('statusChart');
+            var priorityCanvas = document.getElementById('priorityChart');
+
+            if (statusCanvas) {
+                var statusCtx = statusCanvas.getContext('2d');
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
+                        datasets: [{
+                            data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
+                            backgroundColor: ['#6366F1', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#64748B'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '72%'
                     }
-                },
-                cutout: '70%'
-            };
+                });
+            }
 
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
-                    datasets: [{
-                        data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
-                        backgroundColor: ['#6366F1', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#64748B'],
-                        borderWidth: 0
-                    }]
-                },
-                options: chartOptions
-            });
-
-            var priorityCtx = document.getElementById('priorityChart').getContext('2d');
-            new Chart(priorityCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: [@Html.Raw(string.Join(",", Model.PriorityChart.Select(s => $"'{s.Label}'")))],
-                    datasets: [{
-                        data: [@string.Join(",", Model.PriorityChart.Select(s => s.Value.ToString()))],
-                        backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: chartOptions
-            });
-
-
+            if (priorityCanvas) {
+                var priorityCtx = priorityCanvas.getContext('2d');
+                @if (isAdmin) {
+                    <text>
+                    // Render JSM priority column chart
+                    new Chart(priorityCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: [@Html.Raw(string.Join(",", Model.PriorityChart.Select(s => $"'{s.Label}'")))],
+                            datasets: [{
+                                data: [@string.Join(",", Model.PriorityChart.Select(s => s.Value.ToString()))],
+                                backgroundColor: '#4f46e5',
+                                borderRadius: 4,
+                                maxBarThickness: 32
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                x: { 
+                                    grid: { display: false },
+                                    ticks: { color: '#888', font: { size: 11 } }
+                                },
+                                y: { 
+                                    grid: { color: 'rgba(0,0,0,0.05)' },
+                                    ticks: { stepSize: 1, color: '#888' } 
+                                }
+                            }
+                        }
+                    });
+                    </text>
+                }
+            }
         });
     </script>
 }
-

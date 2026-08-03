@@ -13,7 +13,6 @@ BEGIN
 	SET NOCOUNT ON;
 	DECLARE @CurrentMonth CHAR(6) = FORMAT(GETDATE(), 'yyyyMM');
 	DECLARE @NewValue INT;
-	BEGIN TRANSACTION;
 	BEGIN TRY
 		IF EXISTS (SELECT 1 FROM tmsSequence WHERE sequenceName = @SequenceName AND monthYear = @CurrentMonth)
 		BEGIN
@@ -22,17 +21,21 @@ BEGIN
 			SELECT @NewValue = currValue FROM tmsSequence
 			WHERE sequenceName = @SequenceName AND monthYear = @CurrentMonth;
 		END
+		ELSE IF EXISTS (SELECT 1 FROM tmsSequence WHERE sequenceName = @SequenceName)
+		BEGIN
+			UPDATE tmsSequence SET currValue = 1, monthYear = @CurrentMonth, ModifiedOn = GETDATE()
+			WHERE sequenceName = @SequenceName;
+			SET @NewValue = 1;
+		END
 		ELSE
 		BEGIN
 			INSERT INTO tmsSequence (sequenceName, currValue, monthYear, IsActive, CreatedOn, CreatedBy)
 			VALUES (@SequenceName, 1, @CurrentMonth, 1, GETDATE(), 1);
 			SET @NewValue = 1;
 		END
-		COMMIT TRANSACTION;
 		SELECT @NewValue AS CurrValue, @CurrentMonth AS MonthYear;
 	END TRY
 	BEGIN CATCH
-		ROLLBACK TRANSACTION;
 		THROW;
 	END CATCH;
 END;
