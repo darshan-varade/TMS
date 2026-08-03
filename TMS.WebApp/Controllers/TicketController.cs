@@ -12,10 +12,10 @@ namespace TMS.WebApp.Controllers
 {
     public class TicketController : BaseController
     {
-        public ActionResult Index()
+        public ActionResult Index(bool unassigned = false)
         {
-            ViewBag.Title = "Tickets";
-            return BuildShell(false);
+            ViewBag.Title = unassigned ? "Unassigned Tickets" : "Tickets";
+            return BuildShell(false, unassigned);
         }
 
         public ActionResult MyAssigned()
@@ -24,7 +24,7 @@ namespace TMS.WebApp.Controllers
             return BuildShell(true);
         }
 
-        private ActionResult BuildShell(bool myAssignedOnly)
+        private ActionResult BuildShell(bool myAssignedOnly, bool unassignedOnly = false)
         {
             MasterDataDAL master = new MasterDataDAL();
             ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name");
@@ -36,8 +36,9 @@ namespace TMS.WebApp.Controllers
             ViewBag.IsEmployee = IsEmployee;
             ViewBag.CurrentUserId = CurrentUserId;
             ViewBag.MyAssignedOnly = myAssignedOnly;
+            ViewBag.UnassignedOnly = unassignedOnly;
 
-            return View("Index", new TicketListViewModel());
+            return View("Index", new TicketListViewModel { UnassignedOnly = unassignedOnly });
         }
 
         [HttpPost]
@@ -65,8 +66,14 @@ namespace TMS.WebApp.Controllers
             if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
             if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
 
+            int? targetAssignedUser = assignedToUserId;
+            if (vm.UnassignedOnly)
+            {
+                targetAssignedUser = -1;
+            }
+
             int totalRows;
-            vm.Tickets = dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), vm.SearchTerm, vm.StatusId, vm.PriorityId, vm.CategoryId, vm.DateFrom, vm.DateTo, vm.SortColumn, vm.SortDirection, pageNumber, vm.PageSize, out totalRows, assignedToUserId);
+            vm.Tickets = dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), vm.SearchTerm, vm.StatusId, vm.PriorityId, vm.CategoryId, vm.DateFrom, vm.DateTo, vm.SortColumn, vm.SortDirection, pageNumber, vm.PageSize, out totalRows, targetAssignedUser);
             vm.TotalRows = totalRows;
             vm.PageNumber = pageNumber;
 
@@ -76,6 +83,7 @@ namespace TMS.WebApp.Controllers
             ViewBag.IsEmployee = IsEmployee;
             ViewBag.CurrentUserId = CurrentUserId;
             ViewBag.MyAssignedOnly = myAssignedOnly;
+            ViewBag.UnassignedOnly = vm.UnassignedOnly;
 
             return PartialView("_TicketListPartial", vm);
         }
@@ -593,6 +601,19 @@ namespace TMS.WebApp.Controllers
                 return "File size must be 5 MB or less.";
 
             return null;
+        }
+
+        [HttpGet]
+        public JsonResult GetUnassignedCount()
+        {
+            if (!IsAdmin && !IsSupport)
+            {
+                return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
+            }
+            TicketDAL dal = new TicketDAL();
+            int totalRows;
+            dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), null, null, null, null, null, null, "CreatedOn", "DESC", 1, 1, out totalRows, -1);
+            return Json(new { count = totalRows }, JsonRequestBehavior.AllowGet);
         }
 
         private string GetContentType(string fileName)

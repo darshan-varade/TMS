@@ -103,26 +103,39 @@ $(function () {
         });
     }
     
-    // Set active sidebar item based on URL path
+    // Close off-canvas sidebar on mobile after clicking a nav item
+    $(document).on('click', '.sidebar-nav-item', function () {
+        if (window.matchMedia('(max-width: 991.98px)').matches) {
+            sidebar.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
+        }
+    });
+    
+    // Set active sidebar item based on URL path and query parameters
     var currentPath = window.location.pathname.toLowerCase();
     if (currentPath.endsWith('/') && currentPath.length > 1) {
         currentPath = currentPath.substring(0, currentPath.length - 1);
     }
+    var currentQuery = window.location.search.toLowerCase();
     
     var matchedItem = null;
     var exactMatchFound = false;
     
     $('.sidebar-nav-item').removeClass('active');
     
-    // First pass: try to find an exact match
+    // First pass: try to find an exact match (including query params if they exist in the link)
     $('.sidebar-nav-item').each(function() {
-        var href = $(this).attr('href');
-        if (href) {
-            href = href.toLowerCase();
-            if (href.endsWith('/') && href.length > 1) {
-                href = href.substring(0, href.length - 1);
+        var hrefAttr = $(this).attr('href');
+        if (hrefAttr) {
+            var parts = hrefAttr.toLowerCase().split('?');
+            var linkPath = parts[0];
+            var linkQuery = parts.length > 1 ? '?' + parts[1] : '';
+            
+            if (linkPath.endsWith('/') && linkPath.length > 1) {
+                linkPath = linkPath.substring(0, linkPath.length - 1);
             }
-            if (currentPath === href) {
+            
+            if (currentPath === linkPath && currentQuery === linkQuery) {
                 matchedItem = $(this);
                 exactMatchFound = true;
                 return false;
@@ -130,16 +143,39 @@ $(function () {
         }
     });
     
-    // Second pass: if no exact match, prefix match
+    // Second pass: if no exact match, prioritize matching by path with NO query parameters
     if (!exactMatchFound) {
         $('.sidebar-nav-item').each(function() {
-            var href = $(this).attr('href');
-            if (href) {
-                href = href.toLowerCase();
-                if (href.endsWith('/') && href.length > 1) {
-                    href = href.substring(0, href.length - 1);
+            var hrefAttr = $(this).attr('href');
+            if (hrefAttr) {
+                var parts = hrefAttr.toLowerCase().split('?');
+                var linkPath = parts[0];
+                var linkQuery = parts.length > 1 ? '?' + parts[1] : '';
+                
+                if (linkPath.endsWith('/') && linkPath.length > 1) {
+                    linkPath = linkPath.substring(0, linkPath.length - 1);
                 }
-                if (href !== '/' && (currentPath.indexOf(href + '/') === 0)) {
+                
+                if (currentPath === linkPath && linkQuery === '') {
+                    matchedItem = $(this);
+                    exactMatchFound = true;
+                    return false;
+                }
+            }
+        });
+    }
+    
+    // Third pass: prefix match
+    if (!exactMatchFound) {
+        $('.sidebar-nav-item').each(function() {
+            var hrefAttr = $(this).attr('href');
+            if (hrefAttr) {
+                var parts = hrefAttr.toLowerCase().split('?');
+                var linkPath = parts[0];
+                if (linkPath.endsWith('/') && linkPath.length > 1) {
+                    linkPath = linkPath.substring(0, linkPath.length - 1);
+                }
+                if (linkPath !== '/' && (currentPath.indexOf(linkPath + '/') === 0)) {
                     matchedItem = $(this);
                     return false;
                 }
@@ -154,8 +190,21 @@ $(function () {
     
     if (matchedItem) {
         matchedItem.addClass('active');
+        var parentCollapse = matchedItem.closest('.collapse');
+        if (parentCollapse.length > 0) {
+            parentCollapse.addClass('show');
+            var toggleButton = $('[data-bs-target="#' + parentCollapse.attr('id') + '"]');
+            toggleButton.removeClass('collapsed').attr('aria-expanded', 'true');
+        }
     }
 
-
+    // Load unassigned count if the element exists
+    if ($('#unassignedCountBadge').length > 0) {
+        $.getJSON('/Ticket/GetUnassignedCount', function(data) {
+            if (data && data.count > 0) {
+                $('#unassignedCountBadge').text(data.count).show();
+            }
+        });
+    }
 });
 

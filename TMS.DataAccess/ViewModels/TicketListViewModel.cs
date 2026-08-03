@@ -18,6 +18,7 @@ namespace TMS.DataAccess.ViewModels
 
         public string SortColumn { get; set; } = "CreatedOn";
         public string SortDirection { get; set; } = "DESC";
+        public bool UnassignedOnly { get; set; }
     }
 
     public class TicketRowViewModel

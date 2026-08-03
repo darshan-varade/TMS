@@ -7,7 +7,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h2 class="fw-bold mb-1">@(myAssignedOnly ? "My Assigned Tickets" : "Tickets")</h2>
+        <h2 class="fw-bold mb-1">@(myAssignedOnly ? "My Assigned Tickets" : (Model.UnassignedOnly ? "Unassigned Tickets" : "Tickets"))</h2>
         <p class="text-secondary mb-0" style="font-size: 0.9rem;">View and manage the ticketing lifecycle</p>
     </div>
     <div class="d-flex gap-2">
@@ -32,6 +32,7 @@
     @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
     @Html.HiddenFor(m => m.SortColumn, new { id = "SortColumn" })
     @Html.HiddenFor(m => m.SortDirection, new { id = "SortDirection" })
+    @Html.HiddenFor(m => m.UnassignedOnly)
 
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
