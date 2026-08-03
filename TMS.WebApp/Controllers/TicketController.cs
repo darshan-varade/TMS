@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -178,6 +179,13 @@ namespace TMS.WebApp.Controllers
                 c.Attachments = attachments.Where(a => a.CommentId == c.CommentId).ToList();
             }
 
+            var mainAttachments = attachments;
+            if (IsEmployee)
+            {
+                var internalCommentIds = new HashSet<int>(comments.Where(c => c.IsInternal).Select(c => c.CommentId));
+                mainAttachments = attachments.Where(a => !a.CommentId.HasValue || !internalCommentIds.Contains(a.CommentId.Value)).ToList();
+            }
+
             var vm = new TicketDetailViewModel
             {
                 TicketId = ticket.TicketId,
@@ -199,7 +207,7 @@ namespace TMS.WebApp.Controllers
                 CreatedByUserId = ticket.CreatedBy,
                 Comments = comments,
                 Activities = IsEmployee ? null : dal.GetActivities(id),
-                Attachments = attachments
+                Attachments = mainAttachments
             };
 
             ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name", ticket.StatusId);
@@ -396,7 +404,13 @@ namespace TMS.WebApp.Controllers
             }
 
             if (!IsAdmin && !IsSupport)
+            {
                 isInternal = false;
+            }
+            else if (IsSupport && ticket.AssignedToUserId != CurrentUserId)
+            {
+                isInternal = true;
+            }
 
             try
             {
@@ -563,7 +577,7 @@ namespace TMS.WebApp.Controllers
         {
             if (ticket == null) return false;
             if (IsAdmin) return true;
-            if (IsSupport) return ticket.AssignedToUserId == CurrentUserId;
+            if (IsSupport) return true;
             return ticket.CreatedBy == CurrentUserId;
         }
 

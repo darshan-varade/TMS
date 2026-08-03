@@ -24,6 +24,8 @@
     bool isOwner = Model.CreatedByUserId == (int)ViewBag.CurrentUserId;
     bool canEdit = isAdmin || (isOwner && !Model.AssignedToUserId.HasValue);
     bool canDelete = isAdmin || (isOwner && !Model.AssignedToUserId.HasValue);
+    bool isAssignedToMe = Model.AssignedToUserId == (int)ViewBag.CurrentUserId;
+    bool canManageTicket = isAdmin || (isSupport && isAssignedToMe);
 
     // Combine comments and activities chronologically
     var timelineItems = new List<dynamic>();
@@ -91,6 +93,8 @@
             </div>
         </div>
 
+        @if (!isEmployee)
+        {
         <!-- Attachments JSM Section -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -138,6 +142,7 @@
                 }
             </div>
         </div>
+        }
 
         <!-- Activity Feed Section -->
         <div class="card border-0 shadow-sm mb-4">
@@ -168,9 +173,13 @@
                     <div class="flex-grow-1">
                         <!-- Collapsed input state -->
                         <div id="commentCollapsed" class="comment-collapsed-box border rounded px-3 py-2 text-muted" onclick="expandCommentEditor()" style="border-radius: 8px;">
-                            @if (isAdmin || isSupport)
+                            @if (isAdmin || (isSupport && isAssignedToMe))
                             {
                                 <span>Add internal note or Reply to customer...</span>
+                            }
+                            else if (isSupport)
+                            {
+                                <span>Add an internal note...</span>
                             }
                             else
                             {
@@ -179,13 +188,13 @@
                         </div>
                         
                         <!-- Expanded Editor State -->
-                        <div id="commentExpanded" class="comment-expanded-box border rounded p-3 d-none">
+                        <div id="commentExpanded" class="comment-expanded-box border rounded p-3 d-none@((isAdmin || (isSupport && isAssignedToMe)) ? "" : " internal-note-mode")">
                             <form method="post" action="@Url.Action("AddComment", "Ticket")" enctype="multipart/form-data">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="ticketId" value="@Model.TicketId" />
-                                <input type="hidden" name="isInternal" id="commentIsInternal" value="false" />
+                                <input type="hidden" name="isInternal" id="commentIsInternal" value="@((isAdmin || (isSupport && isAssignedToMe)) ? "false" : "true")" />
                                 
-                                @if (isAdmin || isSupport)
+                                @if (isAdmin || (isSupport && isAssignedToMe))
                                 {
                                     <ul class="nav nav-tabs border-bottom-0 mb-3 comment-type-tabs">
                                         <li class="nav-item">
@@ -336,7 +345,7 @@
             {
                 <button type="button" class="btn btn-outline-success w-100 py-2 fw-semibold" data-action="assign" data-ticket-id="@Model.TicketId"><i class="bi bi-person-check"></i> Assign Ticket</button>
             }
-            @if (isAdmin || isSupport)
+            @if (canManageTicket)
             {
                 <button type="button" class="btn btn-outline-primary w-100 py-2 fw-semibold" data-action="updatestatus" data-ticket-id="@Model.TicketId"><i class="bi bi-arrow-repeat"></i> Update Status</button>
             }
