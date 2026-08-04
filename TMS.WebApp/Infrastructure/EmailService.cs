@@ -20,7 +20,10 @@ namespace TMS.WebApp.Infrastructure
                     msg.Subject = ConfigurationManager.AppSettings["OtpEmailSubject"] ?? "Your OTP Code - TMS";
                     msg.IsBodyHtml = true;
 
-                    string templatePath = HostingEnvironment.MapPath("~/EmailTemplates/OtpEmail.html");
+                    string templateFolder = ConfigurationManager.AppSettings["EmailTemplatePath"] ?? "~/EmailTemplates";
+                    string templatePath = templateFolder.StartsWith("~/")
+                        ? HostingEnvironment.MapPath(templateFolder + "/OtpEmail.html")
+                        : Path.Combine(templateFolder, "OtpEmail.html");
                     if (File.Exists(templatePath))
                         msg.Body = File.ReadAllText(templatePath).Replace("{otpCode}", otpCode);
                     else

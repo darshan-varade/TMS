@@ -513,7 +513,7 @@ namespace TMS.WebApp.Controllers
                     return RedirectToAction("Index");
                 }
 
-                string uploadDir = Server.MapPath("~/Content/Uploads/Tickets");
+                string uploadDir = GetUploadPath();
                 string fullPath = Path.Combine(uploadDir, safeFileName);
                 if (!System.IO.File.Exists(fullPath))
                 {
@@ -549,7 +549,7 @@ namespace TMS.WebApp.Controllers
                 if (string.IsNullOrEmpty(safeFileName))
                     return HttpNotFound("File not found.");
 
-                string uploadDir = Server.MapPath("~/Content/Uploads/Tickets");
+                string uploadDir = GetUploadPath();
                 string fullPath = Path.Combine(uploadDir, safeFileName);
                 if (!System.IO.File.Exists(fullPath))
                     return HttpNotFound("File not found.");
@@ -572,7 +572,7 @@ namespace TMS.WebApp.Controllers
 
         private string StoreFile(HttpPostedFileBase file)
         {
-            string uploadDir = Server.MapPath("~/Content/Uploads/Tickets");
+            string uploadDir = GetUploadPath();
             if (!Directory.Exists(uploadDir))
                 Directory.CreateDirectory(uploadDir);
 
@@ -581,6 +581,12 @@ namespace TMS.WebApp.Controllers
             string filePath = Path.Combine(uploadDir, storedName);
             file.SaveAs(filePath);
             return storedName;
+        }
+
+        private string GetUploadPath()
+        {
+            string path = ConfigurationManager.AppSettings["UploadPath"] ?? "~/Content/Uploads/Tickets";
+            return path.StartsWith("~/") ? Server.MapPath(path) : path;
         }
 
         private static readonly string[] AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx" };
