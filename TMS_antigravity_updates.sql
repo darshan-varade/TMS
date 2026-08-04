@@ -1,11 +1,4 @@
--- ====================================================================================
--- TMS Database Updates (Antigravity modifications not present in TMS_SP or TMS_Tables)
--- ====================================================================================
 
--- ====================================================================================
--- 1. Modified Stored Procedure: tmsTicketGetList
--- Added support for filtering unassigned tickets by passing @AssignedToUserId = -1.
--- ====================================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetList
 	@SearchTerm VARCHAR(200) = NULL, 
 	@StatusId INT = NULL, 
@@ -39,7 +32,6 @@ BEGIN
 			AND (@StatusId IS NULL OR t.statusId = @StatusId)
 			AND (@PriorityId IS NULL OR t.priorityId = @PriorityId)
 			AND (@CategoryId IS NULL OR t.categoryId = @CategoryId)
-			-- Modified to handle unassigned check (-1 parameter value filter for NULL assignee)
 			AND (@AssignedToUserId IS NULL OR (@AssignedToUserId = -1 AND t.assignedToUserId IS NULL) OR (@AssignedToUserId <> -1 AND t.assignedToUserId = @AssignedToUserId))
 			AND (@DateFrom IS NULL OR t.CreatedOn >= @DateFrom)
 			AND (@DateTo IS NULL OR t.CreatedOn <= @DateTo)
@@ -61,7 +53,6 @@ BEGIN
 			AND (@StatusId IS NULL OR t.statusId = @StatusId)
 			AND (@PriorityId IS NULL OR t.priorityId = @PriorityId)
 			AND (@CategoryId IS NULL OR t.categoryId = @CategoryId)
-			-- Modified to handle unassigned check (-1 parameter value filter for NULL assignee)
 			AND (@AssignedToUserId IS NULL OR (@AssignedToUserId = -1 AND t.assignedToUserId IS NULL) OR (@AssignedToUserId <> -1 AND t.assignedToUserId = @AssignedToUserId))
 			AND (@DateFrom IS NULL OR t.CreatedOn >= @DateFrom)
 			AND (@DateTo IS NULL OR t.CreatedOn <= @DateTo)

@@ -1,11 +1,4 @@
--- ================================================================
--- TMS (Ticket Management System) - Stored Procedures
--- Server: VPNSERVER1\SQLEXPRESS | Database: Training_DB_Darshan_Varade
--- ================================================================
 
--- ================================================================
--- 1. tmsSequenceGetNextValue
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsSequenceGetNextValue
 	@SequenceName VARCHAR(50)
 AS
@@ -41,9 +34,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 2. tmsUserCheckEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserCheckEmail
 	@Email VARCHAR(100)
 AS
@@ -53,9 +43,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 3. tmsUserRegister
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserRegister
 	@FullName VARCHAR(100),
 	@MobileNumber VARCHAR(15),
@@ -81,9 +68,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 4. tmsUserLogin
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserLogin
 	@Email VARCHAR(100)
 AS
@@ -104,9 +88,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 4b. tmsUserUpdateLastLogin
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserUpdateLastLogin
 	@UserId INT
 AS
@@ -121,9 +102,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 5. tmsOtpCreateByEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpCreateByEmail
 	@OtpEmail VARCHAR(100), @OtpCode CHAR(6), @ExpiresAt DATETIME
 AS
@@ -139,9 +117,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 6. tmsOtpValidateByEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpValidateByEmail
 	@OtpEmail VARCHAR(100), @OtpCode CHAR(6)
 AS
@@ -158,9 +133,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 7. tmsOtpMarkUsed
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpMarkUsed
 	@OtpId INT
 AS
@@ -175,9 +147,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 7b. tmsOtpGetLatestTimeByEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpGetLatestTimeByEmail
 	@Email VARCHAR(100)
 AS
@@ -192,9 +161,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 8. tmsRefreshTokenCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenCreate
 	@UserId INT, @RefreshTokenHash VARCHAR(255), @ExpiresAt DATETIME
 AS
@@ -213,9 +179,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 9. tmsRefreshTokenGetByHash
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenGetByHash
 	@Hash VARCHAR(255)
 AS
@@ -236,9 +199,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 10. tmsRefreshTokenRotate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenRotate
 	@OldRefreshTokenId INT, @NewRefreshTokenHash VARCHAR(255), @NewExpiresAt DATETIME, @UserId INT
 AS
@@ -259,9 +219,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 11. tmsRefreshTokenRevoke (by token ID)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenRevoke
 	@RefreshTokenId INT
 AS
@@ -276,9 +233,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 12. tmsRefreshTokenRevokeByUserId
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenRevokeByUserId
 	@UserId INT
 AS
@@ -296,9 +250,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 13. tmsDepartmentGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDepartmentGetAll
 AS
 BEGIN
@@ -312,9 +263,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 14. tmsRoleGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRoleGetAll
 AS
 BEGIN
@@ -328,9 +276,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 15. tmsCategoryGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsCategoryGetAll
 AS
 BEGIN
@@ -344,9 +289,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 16. tmsPriorityGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsPriorityGetAll
 AS
 BEGIN
@@ -364,9 +306,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 17. tmsStatusGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsStatusGetAll
 AS
 BEGIN
@@ -380,9 +319,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 18. tmsTicketCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketCreate
 	@CreatedBy INT, @Title VARCHAR(200), @Description VARCHAR(MAX), @CategoryId INT, @PriorityId INT
 AS
@@ -410,9 +346,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 19. tmsTicketGetByUserId
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetByUserId
 	@UserId INT
 AS
@@ -435,9 +368,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 20. tmsTicketGetById
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetById
 	@TicketId INT
 AS
@@ -462,9 +392,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 21. tmsTicketGetList (filtered, paginated)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetList
 	@SearchTerm VARCHAR(200) = NULL, @StatusId INT = NULL, @PriorityId INT = NULL,
 	@CategoryId INT = NULL, @AssignedToUserId INT = NULL,
@@ -534,9 +461,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 22. tmsTicketUpdate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketUpdate
 	@TicketId INT, @Title VARCHAR(200), @Description VARCHAR(MAX), @CategoryId INT = NULL,
 	@PriorityId INT, @StatusId INT, @AssignedToUserId INT = NULL, @ModifiedBy INT
@@ -593,9 +517,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 22b. tmsTicketAssign (Admin assigns ticket to Support Executive)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketAssign
 	@TicketId INT, @AssignedToUserId INT, @ModifiedBy INT
 AS
@@ -637,9 +558,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 22c. tmsTicketUpdateStatus (Admin/Support change status + priority)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketUpdateStatus
 	@TicketId INT, @StatusId INT, @PriorityId INT, @ModifiedBy INT
 AS
@@ -682,9 +600,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 23. tmsTicketDelete (soft delete)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketDelete
 	@TicketId INT, @ModifiedBy INT
 AS
@@ -700,9 +615,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 24. tmsTicketCommentCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketCommentCreate
 	@TicketId INT, @CreatedBy INT, @Comment VARCHAR(MAX), @IsInternal BIT = 0
 AS
@@ -723,9 +635,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 25. tmsTicketAttachmentCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketAttachmentCreate
 	@TicketId INT, @CommentId INT = NULL, @CreatedBy INT, @StoredFileName VARCHAR(255), @OriginalFileName VARCHAR(255),
 	@FileExtension VARCHAR(10), @ContentType VARCHAR(100), @FileSize INT
@@ -745,9 +654,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 26. tmsTicketActivityCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketActivityCreate
 	@TicketId INT, @CreatedBy INT, @ActivityTypeName VARCHAR(50),
 	@Remarks VARCHAR(MAX) = NULL, @OldValue VARCHAR(200) = NULL, @NewValue VARCHAR(200) = NULL
@@ -766,9 +672,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 27. tmsTicketGetComments
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetComments
 	@TicketId INT
 AS
@@ -788,9 +691,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 28. tmsTicketGetActivity
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetActivity
 	@TicketId INT
 AS
@@ -812,9 +712,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 29. tmsTicketGetAttachments
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetAttachments
 	@TicketId INT
 AS
@@ -835,9 +732,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 29b. tmsTicketGetAttachmentById
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetAttachmentById
 	@AttachmentId INT
 AS
@@ -857,9 +751,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 30. tmsUserGetList (filtered, paginated)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetList
 	@SearchTerm VARCHAR(200) = NULL, @RoleId INT = NULL,
 	@SortColumn VARCHAR(50) = 'CreatedOn', @SortDirection VARCHAR(4) = 'DESC',
@@ -906,9 +797,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 31. tmsUserAdd
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserAdd
 	@FullName VARCHAR(100), @MobileNumber VARCHAR(15), @Email VARCHAR(100),
 	@PasswordHash VARCHAR(255), @RoleId INT, @DepartmentId INT, @CreatedBy INT,
@@ -929,9 +817,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 32. tmsUserUpdate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserUpdate
 	@UserId INT, @FullName VARCHAR(100), @MobileNumber VARCHAR(15),
 	@RoleId INT, @DepartmentId INT, @IsActive BIT, @ModifiedBy INT
@@ -970,9 +855,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 33. tmsUserChangeRole (Admin changes a user's role, with last-admin guard)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserChangeRole
 	@UserId INT, @RoleId INT, @ModifiedBy INT
 AS
@@ -1015,9 +897,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 34. tmsUserToggleStatus
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserToggleStatus
 	@UserId INT, @IsActive BIT, @ModifiedBy INT
 AS
@@ -1051,9 +930,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 34b. tmsUserSetApproval (Admin approves/rejects a self-registered user)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserSetApproval
 	@UserId INT, @IsApproved TINYINT = NULL, @ModifiedBy INT
 AS
@@ -1069,9 +945,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 34c. tmsUserDelete (Admin soft-deletes a user; last active admin is protected)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserDelete
 	@UserId INT, @ModifiedBy INT
 AS
@@ -1114,9 +987,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 35. tmsUserUpdateProfile
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserUpdateProfile
 	@UserId INT, @FullName VARCHAR(100), @MobileNumber VARCHAR(15)
 AS
@@ -1131,9 +1001,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 35. tmsUserChangePassword
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserChangePassword
 	@CredentialId INT, @PasswordHash VARCHAR(255)
 AS
@@ -1148,9 +1015,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 36. tmsUserGetById
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetById
 	@UserId INT
 AS
@@ -1172,9 +1036,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 37. tmsUserGetSupportList
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetSupportList
 AS
 BEGIN
@@ -1193,9 +1054,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 38. tmsDashboardGetData
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetData
 	@UserId INT, @RoleName VARCHAR(50)
 AS
@@ -1244,9 +1102,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 39. tmsDashboardGetStatusChart
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetStatusChart
 	@UserId INT, @RoleName VARCHAR(50)
 AS
@@ -1281,9 +1136,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 40. tmsDashboardGetPriorityChart
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetPriorityChart
 	@UserId INT, @RoleName VARCHAR(50)
 AS
@@ -1318,9 +1170,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 41. tmsDashboardGetRecentTickets
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetRecentTickets
 	@UserId INT, @RoleName VARCHAR(50), @Count INT = 5
 AS

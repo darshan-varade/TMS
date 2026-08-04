@@ -83,7 +83,6 @@ $(function () {
         actionModalContent.html('');
     });
 
-    // Lightbox Overlay logic
     var overlayHtml = 
         '<div id="attachment-preview-overlay" class="attachment-preview-overlay d-none">' +
         '    <div class="preview-top-bar">' +
@@ -133,7 +132,6 @@ $(function () {
     var currentIndex = 0;
     var currentZoom = 1.0;
     
-    // Drag/Pan states
     var isDragging = false;
     var startX = 0, startY = 0;
     var translateX = 0, translateY = 0;
@@ -153,32 +151,26 @@ $(function () {
         if (currentIndex < 0 || currentIndex >= attachments.length) return;
         var item = attachments[currentIndex];
         
-        // Reset Zoom & Pan
         currentZoom = 1.0;
         translateX = 0;
         translateY = 0;
         $zoomContainer.css('transform', 'translate(0px, 0px) scale(1)');
         $('.preview-zoom-percentage').text('100 %');
 
-        // File Details
         $overlay.find('.preview-file-name').text(item.name);
-        $overlay.find('.preview-file-details').text(item.typeString + ' · ' + item.size);
+        $overlay.find('.preview-file-details').text(item.typeString + ' Â· ' + item.size);
         
-        // Icon
         var iconClass = getFileIconClass(item.name);
         $overlay.find('.preview-file-icon').html('<i class="' + iconClass + '" style="font-size: 1.5rem;"></i>');
 
-        // Download link
         $overlay.find('.download-btn').attr('href', item.downloadUrl).attr('download', item.name);
 
-        // Hide/Show navigation buttons based on count
         if (attachments.length <= 1) {
             $overlay.find('.prev-btn, .next-btn').addClass('d-none');
         } else {
             $overlay.find('.prev-btn, .next-btn').removeClass('d-none');
         }
 
-        // Show/Hide Media
         if (item.type === 'image') {
             $iframe.addClass('d-none').attr('src', '');
             $placeholder.addClass('d-none');
@@ -231,10 +223,9 @@ $(function () {
         
         updatePreview();
         $overlay.removeClass('d-none');
-        $('body').css('overflow', 'hidden'); // Prevent background scroll
+        $('body').css('overflow', 'hidden');
     });
 
-    // Close Actions
     function closeOverlay() {
         $overlay.addClass('d-none');
         $img.attr('src', '');
@@ -250,7 +241,6 @@ $(function () {
         }
     });
 
-    // Navigation
     $(document).on('click', '#attachment-preview-overlay .next-btn', function(e) {
         e.stopPropagation();
         if (attachments.length === 0) return;
@@ -265,7 +255,6 @@ $(function () {
         updatePreview();
     });
 
-    // Keyboard Shortcuts
     $(document).on('keydown', function(e) {
         if ($overlay.hasClass('d-none')) return;
         if (e.key === 'Escape') {
@@ -279,7 +268,6 @@ $(function () {
         }
     });
 
-    // Zoom Functions
     function setZoom(zoom) {
         currentZoom = Math.min(3.0, Math.max(0.25, zoom));
         var percent = Math.round(currentZoom * 100) + ' %';
@@ -297,9 +285,8 @@ $(function () {
         setZoom(currentZoom - 0.25);
     });
 
-    // Pan / Drag Logic (Images only)
     $stage.on('mousedown', function(e) {
-        if ($img.hasClass('d-none')) return; // Only pan images
+        if ($img.hasClass('d-none')) return;
         if ($(e.target).closest('.preview-nav-btn, .preview-top-bar, .preview-bottom-bar').length) return;
         
         isDragging = true;

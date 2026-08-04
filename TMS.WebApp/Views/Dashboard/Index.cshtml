@@ -39,8 +39,6 @@
 
     @if (isAdmin)
     {
-        <!-- ================= ADMIN JSM-THEMED DASHBOARD ================= -->
-        <!-- Top Metrics Cards -->
         <div class="row g-4 mb-4">
             <div class="col-sm-6 col-lg-3">
                 <div class="jsm-stat-card shadow-sm">
@@ -88,7 +86,6 @@
             </div>
         </div>
 
-        <!-- Row 2: Status Overview & Priority Breakdown -->
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <div class="jsm-card shadow-sm h-100 mb-0">
@@ -142,7 +139,6 @@
             </div>
         </div>
 
-        <!-- Row 3: Request Type & Recent Activity -->
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="jsm-card shadow-sm h-100 mb-0">
@@ -255,8 +251,6 @@
     }
     else if (isSupport)
     {
-        <!-- ================= SUPPORT EXECUTIVE DASHBOARD ================= -->
-        <!-- Metric Cards Row -->
         <div class="row g-4 mb-4">
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm p-3">
@@ -299,7 +293,6 @@
             </div>
         </div>
 
-        <!-- My Queue List -->
         <div class="card border-0 shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-bold">My Active Queue</h6>
@@ -354,8 +347,6 @@
     }
     else
     {
-        <!-- ================= EMPLOYEE DASHBOARD ================= -->
-        <!-- Welcome Banner CTA -->
         <div class="normal-welcome-banner text-center text-sm-start d-sm-flex align-items-center justify-content-between p-4 mb-4">
             <div>
                 <h3 class="fw-bold mb-2">How can we help you today?</h3>
@@ -369,7 +360,6 @@
         </div>
 
         <div class="row g-4">
-            <!-- Left Side: Simple Stat Card & Quick links -->
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm p-4 mb-4">
                     <h6 class="fw-bold mb-3">My Requests Summary</h6>
@@ -389,7 +379,6 @@
                 </div>
             </div>
 
-            <!-- Right Side: Recent Tickets Raised by Me -->
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header border-0 pb-0" style="background: transparent;">
@@ -478,7 +467,6 @@
                 var priorityCtx = priorityCanvas.getContext('2d');
                 @if (isAdmin) {
                     <text>
-                    // Render JSM priority column chart
                     new Chart(priorityCtx, {
                         type: 'bar',
                         data: {

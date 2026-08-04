@@ -11,7 +11,6 @@ namespace TMS.DataAccess.ViewModels
         public int MyAssignedTickets { get; set; }
         public int MyCreatedTickets { get; set; }
 
-        // JSM Stat Cards
         public int CompletedLast7Days { get; set; }
         public int UpdatedLast7Days { get; set; }
         public int CreatedLast7Days { get; set; }

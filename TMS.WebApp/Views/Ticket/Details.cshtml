@@ -27,7 +27,6 @@
     bool isAssignedToMe = Model.AssignedToUserId == (int)ViewBag.CurrentUserId;
     bool canManageTicket = isAdmin || (isSupport && isAssignedToMe);
 
-    // Combine comments and activities chronologically
     var timelineItems = new List<dynamic>();
     if (Model.Comments != null)
     {
@@ -74,9 +73,7 @@
 <div class="ticket-header-title">@Model.Title</div>
 
 <div class="row g-4">
-    <!-- Right Sidebar Column (shows at top on mobile, on right on lg screens) -->
     <div class="col-lg-4 col-xl-3 order-lg-2">
-        <!-- Quick Assign / Status Buttons -->
         <div class="mb-3 d-grid gap-2">
             @if (isAdmin)
             {
@@ -88,7 +85,6 @@
             }
         </div>
 
-        <!-- Sidebar Details panel -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header"><h6 class="mb-0">Details</h6></div>
             <div class="card-body">
@@ -139,9 +135,7 @@
         </div>
     </div>
 
-    <!-- Left Main Column (shows below sidebar details on mobile, on left on lg screens) -->
     <div class="col-lg-8 col-xl-9 order-lg-1">
-        <!-- Key Details Card -->
         <div class="key-details-card mb-4">
             <div class="key-details-header p-3 d-flex align-items-center gap-3">
                 <div class="avatar-circle flex-shrink-0" style="width: 38px; height: 38px; border-radius: 50%; background-color: #E2E8F0; color: #475569; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem;">
@@ -160,7 +154,6 @@
 
         @if (!isEmployee)
         {
-        <!-- Attachments JSM Section -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Attachments <span class="badge bg-light text-secondary border ms-1">@(Model.Attachments != null ? Model.Attachments.Count : 0)</span></h6>
@@ -209,7 +202,6 @@
         </div>
         }
 
-        <!-- Activity Feed Section -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-0 pb-0">
                 <h6 class="mb-0">Activity</h6>
@@ -230,13 +222,11 @@
             </div>
             
             <div class="card-body">
-                <!-- Collapsible / Expandable Comment Box -->
                 <div class="comment-editor-wrapper d-flex gap-3 mb-4">
                     <div class="avatar-circle flex-shrink-0" style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">
                         @GetInitials(User.Identity.Name ?? "User")
                     </div>
                     <div class="flex-grow-1">
-                        <!-- Collapsed input state -->
                         <div id="commentCollapsed" class="comment-collapsed-box border rounded px-3 py-2 text-muted" onclick="expandCommentEditor()" style="border-radius: 8px;">
                             @if (isAdmin || (isSupport && isAssignedToMe))
                             {
@@ -252,7 +242,6 @@
                             }
                         </div>
                         
-                        <!-- Expanded Editor State -->
                         <div id="commentExpanded" class="comment-expanded-box border rounded p-3 d-none@((isAdmin || (isSupport && isAssignedToMe)) ? "" : " internal-note-mode")">
                             <form method="post" action="@Url.Action("AddComment", "Ticket")" enctype="multipart/form-data">
                                 @Html.AntiForgeryToken()
@@ -293,7 +282,6 @@
                     </div>
                 </div>
 
-                <!-- Unified Timeline Stream -->
                 <div class="timeline-stream">
                     @if (sortedTimeline.Any())
                     {

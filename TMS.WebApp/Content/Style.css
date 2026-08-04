@@ -40,7 +40,6 @@ body {
     padding: 0;
 }
 
-/* --- Bootstrap Button & Component Overrides --- */
 .btn-primary {
     background-color: var(--primary) !important;
     border-color: var(--primary) !important;
@@ -78,7 +77,6 @@ body {
     color: var(--text-primary) !important;
 }
 
-/* --- Soft Badges --- */
 .badge {
     font-weight: 600 !important;
     padding: 0.35em 0.75em !important;
@@ -117,7 +115,6 @@ body {
 
 
 
-/* --- Premium Stats Cards --- */
 .stat-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
@@ -573,7 +570,6 @@ textarea:focus {
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* --- Form Control Overrides --- */
 .form-select, .form-control {
     border-radius: 8px !important;
     border-color: var(--border) !important;
@@ -591,7 +587,6 @@ button {
     transition: all 0.2s ease;
 }
 
-/* --- Table Theme Overrides --- */
 .table {
     color: var(--text-primary) !important;
 }
@@ -613,7 +608,6 @@ button {
 }
 
 
-/* --- Card Theme Overrides --- */
 .card {
     background-color: var(--card-bg) !important;
     border-color: var(--border) !important;
@@ -1189,14 +1183,14 @@ footer {
     }
 
     #prevButton::before {
-        content: "‹";
+        content: "â€¹";
         font-size: 1.2rem;
         font-weight: bold;
         line-height: 1;
     }
 
     #nextButton::before {
-        content: "›";
+        content: "â€º";
         font-size: 1.2rem;
         font-weight: bold;
         line-height: 1;
@@ -1789,7 +1783,7 @@ footer {
 
 .select2-container--default .select2-results__option[aria-selected=true]::after,
 .select2-container--default .select2-results__option--selected::after {
-    content: "✓" !important;
+    content: "âœ“" !important;
     position: absolute;
     right: 12px;
     top: 50%;
@@ -2052,7 +2046,6 @@ footer {
     border-color: var(--text-secondary) !important;
 }
 
-/* Bill Add / Edit page */
 .section-card {
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -2186,7 +2179,6 @@ input[readonly] {
     font-size: 1.1rem;
 }
 
-/* Sidebar footer */
 .sidebar-footer {
     margin-top: auto;
     padding: 1.25rem 1rem;
@@ -2222,7 +2214,6 @@ input[readonly] {
     color: #dc2626;
 }
 
-/* ====== Auth pages (Login / Signup) ====== */
 body.auth-page {
     background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, rgba(241, 245, 249, 1) 90%);
     min-height: 100vh;
@@ -2256,7 +2247,6 @@ body.auth-page {
     color: var(--text-primary);
     letter-spacing: -0.5px;
 }
-/* ====== Manage Owners responsive ====== */
 @media (max-width: 640px) {
     .owners-table thead { display: none; }
     .owners-table, .owners-table tbody, .owners-table tr, .owners-table td {
@@ -2310,7 +2300,6 @@ body.auth-page {
     font-size: 0.8rem;
 }
 
-/* Sidebar avatar */
 .sidebar-avatar {
     width: 32px;
     height: 32px;
@@ -2319,7 +2308,6 @@ body.auth-page {
     flex-shrink: 0;
 }
 
-/* ====== Manage Owners Page ====== */
 .owners-header {
     display: flex;
     align-items: flex-start;
@@ -2517,7 +2505,6 @@ body.auth-page {
     font-size: 0.95rem;
 }
 
-/* ====== Profile Page ====== */
 .profile-container {
     max-width: 680px;
     margin: 0 auto;
@@ -2671,7 +2658,6 @@ body.auth-page {
     }
 }
 
-/* ====== Signup OTP ====== */
 .otp-digit {
     width: 48px;
     height: 56px;
@@ -2687,7 +2673,6 @@ body.auth-page {
     box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
 }
 
-/* ====== Profile Action Buttons ====== */
 .profile-actions .btn-cancel {
     background: var(--border);
     color: var(--text-primary);
@@ -2697,7 +2682,6 @@ body.auth-page {
     color: #000;
 }
 
-/* ====== Animated Approval Segmented Control ====== */
 .approval-seg {
     position: relative;
     display: inline-flex;
@@ -2738,7 +2722,6 @@ body.auth-page {
     user-select: none;
 }
 
-/* Tooltip container styling */
 .approval-seg label::before {
     content: attr(data-tooltip);
     position: absolute;
@@ -2760,7 +2743,6 @@ body.auth-page {
     z-index: 100;
 }
 
-/* Tooltip arrow styling */
 .approval-seg label::after {
     content: '';
     position: absolute;
@@ -2776,14 +2758,12 @@ body.auth-page {
     z-index: 100;
 }
 
-/* Hover active behaviors */
 .approval-seg label:hover::before,
 .approval-seg label:hover::after {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
 }
 
-/* Status-specific tooltip variations */
 .approval-seg label[for^="rejected_"]::before {
     border-color: #fca5a5;
     color: #b91c1c;
@@ -2846,7 +2826,6 @@ body.auth-page {
     transform: translateX(200%);
 }
 
-/* Loading & Hover States */
 .approval-seg:hover {
     border-color: #94a3b8;
 }
@@ -2888,7 +2867,6 @@ body.auth-page {
     to { transform: rotate(360deg); }
 }
 
-/* ====== List Pagination ====== */
 .page-buttons {
     display: inline-flex;
     align-items: center;
@@ -2898,12 +2876,10 @@ body.auth-page {
     min-width: 34px;
 }
 
-/* ====== Select2 in Table Cells ====== */
 .assign-user + .select2-container {
     min-width: 130px;
 }
 
-/* ====== Jira Service Management style details page ====== */
 .breadcrumb-jira {
     font-size: 0.825rem;
     color: var(--text-secondary);
@@ -3066,7 +3042,6 @@ body.auth-page {
     width: 100%;
 }
 
-/* Comment Box States */
 .comment-collapsed-box {
     border-color: var(--border) !important;
     background-color: var(--card-bg) !important;
@@ -3120,7 +3095,6 @@ body.auth-page {
     border-bottom: 2px solid var(--warning) !important;
 }
 
-/* Activity tabs and timeline */
 .activity-tabs .nav-link {
     border: none !important;
     background: transparent !important;
@@ -3151,7 +3125,6 @@ body.auth-page {
     padding-bottom: 12px;
 }
 
-/* Custom Attachment Lightbox Overlay */
 .attachment-preview-overlay {
     position: fixed;
     top: 0;
@@ -3349,7 +3322,6 @@ iframe.preview-media {
     color: #cbd5e1;
 }
 
-/* ====== Responsive: Card-style list tables on mobile ====== */
 @media (max-width: 767.98px) {
     .table-responsive {
         overflow: visible;
@@ -3454,7 +3426,6 @@ iframe.preview-media {
     }
 }
 
-/* ====== Responsive: small phones ====== */
 @media (max-width: 576px) {
     .content {
         padding: 1.25rem 1rem 1rem;
@@ -3470,13 +3441,11 @@ iframe.preview-media {
     }
 }
 
-/* Keep .btn-sm sizing for icon-only table buttons despite .btn-primary padding overrides */
 .btn-primary.btn-sm,
 .btn-outline-primary.btn-sm {
     padding: 0.25rem 0.5rem !important;
 }
 
-/* JSM Dashboard Enhancements */
 .jsm-stat-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
@@ -3538,7 +3507,6 @@ iframe.preview-media {
     padding: 1.25rem;
 }
 
-/* JSM Progress List */
 .jsm-progress-list {
     display: flex;
     flex-direction: column;
@@ -3588,7 +3556,6 @@ iframe.preview-media {
     z-index: 2;
 }
 
-/* JSM Workload List */
 .jsm-workload-item {
     display: flex;
     align-items: center;
@@ -3612,7 +3579,6 @@ iframe.preview-media {
     color: #9CA3AF;
 }
 
-/* JSM Timeline/Activity */
 .jsm-timeline {
     position: relative;
     padding-left: 0;
@@ -3664,7 +3630,6 @@ iframe.preview-media {
     margin-left: 0.5rem;
 }
 
-/* CSAT Blank Chart styling */
 .csat-blank-container {
     height: 180px;
     display: flex;
@@ -3691,7 +3656,6 @@ iframe.preview-media {
     margin: 0;
 }
 
-/* Normal user banners */
 .normal-welcome-banner {
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: white;
@@ -3701,7 +3665,6 @@ iframe.preview-media {
     box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
 }
 
-/* ====== Sidebar nav group + polish ====== */
 .sidebar-nav-group {
     margin: 4px 14px;
 }

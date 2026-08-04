@@ -52,7 +52,6 @@ function showToast(message, type) {
         
     container.appendChild(toast);
     
-    // Auto-remove after 4 seconds
     setTimeout(function () {
         toast.classList.remove('show');
         toast.classList.add('fade');
@@ -61,7 +60,6 @@ function showToast(message, type) {
 }
 
 function showConfirm(title, message, confirmBtnText, callback) {
-    // If only 3 arguments are passed, adjust signature
     if (typeof confirmBtnText === 'function') {
         callback = confirmBtnText;
         confirmBtnText = 'Confirm';
@@ -71,7 +69,6 @@ function showConfirm(title, message, confirmBtnText, callback) {
     $('#confirmModalMessage').text(message || 'Are you sure you want to proceed?');
     $('#confirmModalBtn').text(confirmBtnText || 'Confirm');
     
-    // Customize button color if it's a destructive action like Delete
     if (title.toLowerCase().indexOf('delete') > -1 || message.toLowerCase().indexOf('delete') > -1) {
         $('#confirmModalBtn').removeClass('btn-primary').addClass('btn-danger');
     } else {
@@ -86,7 +83,6 @@ function showConfirm(title, message, confirmBtnText, callback) {
 }
 
 $(function () {
-    // Sidebar toggles
     var sidebar = document.getElementById('sidebar');
     var toggle = document.getElementById('sidebarToggle');
     var overlay = document.getElementById('sidebarOverlay');
@@ -103,7 +99,6 @@ $(function () {
         });
     }
     
-    // Close off-canvas sidebar on mobile after clicking a nav item
     $(document).on('click', '.sidebar-nav-item', function () {
         if (window.matchMedia('(max-width: 991.98px)').matches) {
             sidebar.classList.remove('show');
@@ -111,7 +106,6 @@ $(function () {
         }
     });
     
-    // Set active sidebar item based on URL path and query parameters
     var currentPath = window.location.pathname.toLowerCase();
     if (currentPath.endsWith('/') && currentPath.length > 1) {
         currentPath = currentPath.substring(0, currentPath.length - 1);
@@ -123,7 +117,6 @@ $(function () {
     
     $('.sidebar-nav-item').removeClass('active');
     
-    // First pass: try to find an exact match (including query params if they exist in the link)
     $('.sidebar-nav-item').each(function() {
         var hrefAttr = $(this).attr('href');
         if (hrefAttr) {
@@ -143,7 +136,6 @@ $(function () {
         }
     });
     
-    // Second pass: if no exact match, prioritize matching by path with NO query parameters
     if (!exactMatchFound) {
         $('.sidebar-nav-item').each(function() {
             var hrefAttr = $(this).attr('href');
@@ -165,7 +157,6 @@ $(function () {
         });
     }
     
-    // Third pass: prefix match
     if (!exactMatchFound) {
         $('.sidebar-nav-item').each(function() {
             var hrefAttr = $(this).attr('href');
@@ -183,7 +174,6 @@ $(function () {
         });
     }
     
-    // Fallback for dashboard home paths
     if (!matchedItem && (currentPath === '/' || currentPath === '/dashboard' || currentPath === '/dashboard/index')) {
         matchedItem = $('.sidebar-nav-item[href*="Dashboard"]');
     }
@@ -198,7 +188,6 @@ $(function () {
         }
     }
 
-    // Load unassigned count if the element exists
     if ($('#unassignedCountBadge').length > 0) {
         $.getJSON('/Ticket/GetUnassignedCount', function(data) {
             if (data && data.count > 0) {

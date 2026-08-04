@@ -1,18 +1,17 @@
--- ================================================================
--- TMS (Ticket Management System) - Stored Procedures v2
--- Server: VPNSERVER1\SQLEXPRESS | Database: Training_DB_Darshan_Varade
--- Style reference: Battery-Store SPs (temp-table paging, single-pass
--- role filters, minimal IF/ELSE). Result sets/params identical to TMS_SP.sql.
--- ================================================================
 USE Training_DB_Darshan_Varade
 GO
 
--- ================================================================
--- 1. tmsSequenceGetNextValue
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsSequenceGetNextValue
 	@SequenceName VARCHAR(50)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get next sequence value
+***********************************************************************************************
+tmsSequenceGetNextValue
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @CurrentMonth CHAR(6) = CONVERT(CHAR(6), GETDATE(), 112);
@@ -33,21 +32,23 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 2. tmsUserCheckEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserCheckEmail
 	@Email VARCHAR(100)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Check if email is already registered
+***********************************************************************************************
+tmsUserCheckEmail
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	SELECT CAST(CASE WHEN EXISTS (SELECT 1 FROM tmsCredential WHERE emailId = @Email) THEN 1 ELSE 0 END AS BIT) AS EmailExists;
 END;
 GO
 
--- ================================================================
--- 3. tmsUserRegister
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserRegister
 	@FullName VARCHAR(100),
 	@MobileNumber VARCHAR(15),
@@ -55,6 +56,14 @@ CREATE OR ALTER PROCEDURE tmsUserRegister
 	@PasswordHash VARCHAR(255),
 	@DepartmentId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Register a new employee user
+***********************************************************************************************
+tmsUserRegister
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @UserId INT;
@@ -73,12 +82,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 4. tmsUserLogin
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserLogin
 	@Email VARCHAR(100)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get user login details by email
+***********************************************************************************************
+tmsUserLogin
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -96,12 +110,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 4b. tmsUserUpdateLastLogin
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserUpdateLastLogin
 	@UserId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Update user last login time
+***********************************************************************************************
+tmsUserUpdateLastLogin
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -113,12 +132,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 5. tmsOtpCreateByEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpCreateByEmail
 	@OtpEmail VARCHAR(100), @OtpCode CHAR(6), @ExpiresAt DATETIME
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Create OTP for password reset
+***********************************************************************************************
+tmsOtpCreateByEmail
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -131,12 +155,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 6. tmsOtpValidateByEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpValidateByEmail
 	@OtpEmail VARCHAR(100), @OtpCode CHAR(6)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Validate OTP code
+***********************************************************************************************
+tmsOtpValidateByEmail
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -150,12 +179,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 7. tmsOtpMarkUsed
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpMarkUsed
 	@OtpId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Mark OTP as used
+***********************************************************************************************
+tmsOtpMarkUsed
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -167,12 +201,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 7b. tmsOtpGetLatestTimeByEmail
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsOtpGetLatestTimeByEmail
 	@Email VARCHAR(100)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get latest OTP creation time
+***********************************************************************************************
+tmsOtpGetLatestTimeByEmail
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -184,12 +223,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 8. tmsRefreshTokenCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenCreate
 	@UserId INT, @RefreshTokenHash VARCHAR(255), @ExpiresAt DATETIME
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Create refresh token
+***********************************************************************************************
+tmsRefreshTokenCreate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @CredentialId INT;
@@ -205,12 +249,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 9. tmsRefreshTokenGetByHash
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenGetByHash
 	@Hash VARCHAR(255)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get refresh token by hash
+***********************************************************************************************
+tmsRefreshTokenGetByHash
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -228,12 +277,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 10. tmsRefreshTokenRotate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenRotate
 	@OldRefreshTokenId INT, @NewRefreshTokenHash VARCHAR(255), @NewExpiresAt DATETIME, @UserId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Rotate refresh token
+***********************************************************************************************
+tmsRefreshTokenRotate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @CredentialId INT;
@@ -251,12 +305,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 11. tmsRefreshTokenRevoke (by token ID)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenRevoke
 	@RefreshTokenId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Revoke refresh token by id
+***********************************************************************************************
+tmsRefreshTokenRevoke
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -268,12 +327,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 12. tmsRefreshTokenRevokeByUserId
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRefreshTokenRevokeByUserId
 	@UserId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Revoke refresh tokens by user
+***********************************************************************************************
+tmsRefreshTokenRevokeByUserId
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -288,11 +352,16 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 13. tmsDepartmentGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDepartmentGetAll
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get all departments
+***********************************************************************************************
+tmsDepartmentGetAll
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -304,11 +373,16 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 14. tmsRoleGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsRoleGetAll
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get all roles
+***********************************************************************************************
+tmsRoleGetAll
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -320,11 +394,16 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 15. tmsCategoryGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsCategoryGetAll
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get all categories
+***********************************************************************************************
+tmsCategoryGetAll
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -336,11 +415,16 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 16. tmsPriorityGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsPriorityGetAll
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get all priorities
+***********************************************************************************************
+tmsPriorityGetAll
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -356,11 +440,16 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 17. tmsStatusGetAll
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsStatusGetAll
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get all statuses
+***********************************************************************************************
+tmsStatusGetAll
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -372,12 +461,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 18. tmsTicketCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketCreate
 	@CreatedBy INT, @Title VARCHAR(200), @Description VARCHAR(MAX), @CategoryId INT, @PriorityId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Create a new ticket
+***********************************************************************************************
+tmsTicketCreate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @TicketNumber VARCHAR(30), @CurrValue INT, @MonthYear CHAR(6), @StatusId INT, @DueDate DATETIME, @ResolutionHours INT;
@@ -402,12 +496,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 19. tmsTicketGetByUserId
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetByUserId
 	@UserId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get tickets created by a user
+***********************************************************************************************
+tmsTicketGetByUserId
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -427,12 +526,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 20. tmsTicketGetById
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetById
 	@TicketId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get ticket details by id
+***********************************************************************************************
+tmsTicketGetById
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -454,9 +558,6 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 21. tmsTicketGetList (filtered, paginated - temp-table + sp_executesql)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetList
 	@SearchTerm VARCHAR(200) = NULL, @StatusId INT = NULL, @PriorityId INT = NULL,
 	@CategoryId INT = NULL, @AssignedToUserId INT = NULL,
@@ -465,6 +566,15 @@ CREATE OR ALTER PROCEDURE tmsTicketGetList
 	@SortColumn VARCHAR(50) = 'CreatedOn', @SortDirection VARCHAR(4) = 'DESC',
 	@PageNumber INT = 1, @PageSize INT = 10, @TotalRows INT OUTPUT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get filtered, paginated ticket list
+2	3Aug2026		Darshan Varade		Add unassigned ticket filter (@AssignedToUserId = -1)
+***********************************************************************************************
+tmsTicketGetList
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -523,13 +633,18 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 22. tmsTicketUpdate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketUpdate
 	@TicketId INT, @Title VARCHAR(200), @Description VARCHAR(MAX), @CategoryId INT = NULL,
 	@PriorityId INT, @StatusId INT, @AssignedToUserId INT = NULL, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Update ticket details
+***********************************************************************************************
+tmsTicketUpdate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -582,12 +697,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 22b. tmsTicketAssign (Admin assigns ticket to Support Executive)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketAssign
 	@TicketId INT, @AssignedToUserId INT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Assign ticket to a support executive
+***********************************************************************************************
+tmsTicketAssign
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -626,12 +746,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 22c. tmsTicketUpdateStatus (Admin/Support change status + priority)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketUpdateStatus
 	@TicketId INT, @StatusId INT, @PriorityId INT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Update ticket status and priority
+***********************************************************************************************
+tmsTicketUpdateStatus
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -671,12 +796,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 23. tmsTicketDelete (soft delete)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketDelete
 	@TicketId INT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Soft delete a ticket
+***********************************************************************************************
+tmsTicketDelete
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -689,12 +819,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 24. tmsTicketCommentCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketCommentCreate
 	@TicketId INT, @CreatedBy INT, @Comment VARCHAR(MAX), @IsInternal BIT = 0
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Add a ticket comment
+***********************************************************************************************
+tmsTicketCommentCreate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -712,13 +847,19 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 25. tmsTicketAttachmentCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketAttachmentCreate
 	@TicketId INT, @CommentId INT = NULL, @CreatedBy INT, @StoredFileName VARCHAR(255), @OriginalFileName VARCHAR(255),
 	@FileExtension VARCHAR(10), @ContentType VARCHAR(100), @FileSize INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Add a ticket attachment
+2	1Aug2026		Darshan Varade		Support attachment preview
+***********************************************************************************************
+tmsTicketAttachmentCreate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -734,13 +875,18 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 26. tmsTicketActivityCreate
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketActivityCreate
 	@TicketId INT, @CreatedBy INT, @ActivityTypeName VARCHAR(50),
 	@Remarks VARCHAR(MAX) = NULL, @OldValue VARCHAR(200) = NULL, @NewValue VARCHAR(200) = NULL
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Log ticket activity
+***********************************************************************************************
+tmsTicketActivityCreate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @ActivityTypeId INT;
@@ -755,12 +901,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 27. tmsTicketGetComments
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetComments
 	@TicketId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get ticket comments
+***********************************************************************************************
+tmsTicketGetComments
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -777,12 +928,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 28. tmsTicketGetActivity
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetActivity
 	@TicketId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get ticket activity feed
+***********************************************************************************************
+tmsTicketGetActivity
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -801,12 +957,18 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 29. tmsTicketGetAttachments
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetAttachments
 	@TicketId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get ticket attachments
+2	1Aug2026		Darshan Varade		Support attachment preview
+***********************************************************************************************
+tmsTicketGetAttachments
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -824,12 +986,18 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 29b. tmsTicketGetAttachmentById
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsTicketGetAttachmentById
 	@AttachmentId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get attachment file by id
+2	1Aug2026		Darshan Varade		Support attachment preview
+***********************************************************************************************
+tmsTicketGetAttachmentById
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -846,14 +1014,20 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 30. tmsUserGetList (filtered, paginated - temp-table + sp_executesql)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetList
 	@SearchTerm VARCHAR(200) = NULL, @RoleId INT = NULL,
 	@SortColumn VARCHAR(50) = 'CreatedOn', @SortDirection VARCHAR(4) = 'DESC',
 	@PageNumber INT = 1, @PageSize INT = 10, @TotalRows INT OUTPUT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get filtered, paginated user list
+2	1Aug2026		Darshan Varade		Add filters and search
+***********************************************************************************************
+tmsUserGetList
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -897,14 +1071,19 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 31. tmsUserAdd
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserAdd
 	@FullName VARCHAR(100), @MobileNumber VARCHAR(15), @Email VARCHAR(100),
 	@PasswordHash VARCHAR(255), @RoleId INT, @DepartmentId INT, @CreatedBy INT,
 	@UserId INT OUTPUT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Add a new user
+***********************************************************************************************
+tmsUserAdd
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -920,13 +1099,18 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 32. tmsUserUpdate (with last-active-admin guard)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserUpdate
 	@UserId INT, @FullName VARCHAR(100), @MobileNumber VARCHAR(15),
 	@RoleId INT, @DepartmentId INT, @IsActive BIT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Update user details
+***********************************************************************************************
+tmsUserUpdate
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -954,12 +1138,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 33. tmsUserChangeRole (with last-active-admin guard)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserChangeRole
 	@UserId INT, @RoleId INT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Change user role
+***********************************************************************************************
+tmsUserChangeRole
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -988,12 +1177,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 34. tmsUserToggleStatus (with last-active-admin guard)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserToggleStatus
 	@UserId INT, @IsActive BIT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Activate or deactivate a user
+***********************************************************************************************
+tmsUserToggleStatus
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1017,12 +1211,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 34b. tmsUserSetApproval (Admin approves/rejects a self-registered user)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserSetApproval
 	@UserId INT, @IsApproved TINYINT = NULL, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Approve or reject self-registered user
+***********************************************************************************************
+tmsUserSetApproval
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1035,12 +1234,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 34c. tmsUserDelete (Admin soft-deletes a user; last active admin is protected)
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserDelete
 	@UserId INT, @ModifiedBy INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Soft delete a user
+***********************************************************************************************
+tmsUserDelete
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1072,12 +1276,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 35. tmsUserUpdateProfile
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserUpdateProfile
 	@UserId INT, @FullName VARCHAR(100), @MobileNumber VARCHAR(15)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Update own profile
+***********************************************************************************************
+tmsUserUpdateProfile
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1089,12 +1298,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 35. tmsUserChangePassword
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserChangePassword
 	@CredentialId INT, @PasswordHash VARCHAR(255)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Change user password
+***********************************************************************************************
+tmsUserChangePassword
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1106,12 +1320,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 36. tmsUserGetById
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetById
 	@UserId INT
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get user by id
+***********************************************************************************************
+tmsUserGetById
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1130,11 +1349,16 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 37. tmsUserGetSupportList
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsUserGetSupportList
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get support executive users
+***********************************************************************************************
+tmsUserGetSupportList
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1151,12 +1375,18 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 38. tmsDashboardGetData
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetData
 	@UserId INT, @RoleName VARCHAR(50)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get dashboard stat cards
+2	3Aug2026		Darshan Varade		Fix empty-data stats (ISNULL on status counts)
+***********************************************************************************************
+tmsDashboardGetData
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1189,12 +1419,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 39. tmsDashboardGetStatusChart
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetStatusChart
 	@UserId INT, @RoleName VARCHAR(50)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get dashboard status chart data
+***********************************************************************************************
+tmsDashboardGetStatusChart
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1212,12 +1447,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 40. tmsDashboardGetPriorityChart
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetPriorityChart
 	@UserId INT, @RoleName VARCHAR(50)
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get dashboard priority chart data
+***********************************************************************************************
+tmsDashboardGetPriorityChart
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
@@ -1235,12 +1475,17 @@ BEGIN
 END;
 GO
 
--- ================================================================
--- 41. tmsDashboardGetRecentTickets
--- ================================================================
 CREATE OR ALTER PROCEDURE tmsDashboardGetRecentTickets
 	@UserId INT, @RoleName VARCHAR(50), @Count INT = 5
 AS
+/*
+***********************************************************************************************
+	Date   			Modified By   		Purpose of Modification
+1	31Jul2026		Darshan Varade		Get dashboard recent tickets
+***********************************************************************************************
+tmsDashboardGetRecentTickets
+
+*/
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY

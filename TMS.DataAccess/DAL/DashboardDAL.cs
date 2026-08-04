@@ -158,7 +158,6 @@ namespace TMS.DataAccess.DAL
 
             try
             {
-                // 1. Stat cards
                 string statQuery = string.Format(@"
                     SELECT 
                         (SELECT COUNT(*) FROM tmsTicket WHERE statusId IN (4, 6) AND IsActive = 1 AND ModifiedOn >= DATEADD(day, -7, GETDATE()){0}) as CompletedCount,
@@ -179,7 +178,6 @@ namespace TMS.DataAccess.DAL
                     }
                 }
 
-                // 2. Category Distribution
                 vm.CategoryDistribution = new List<CategoryCountViewModel>();
                 string catQuery = string.Format(@"
                     SELECT c.categoryName, COUNT(t.ticketId) as ticketCount 
@@ -204,7 +202,6 @@ namespace TMS.DataAccess.DAL
                         });
                     }
                 }
-                // Calculate category percentages
                 if (totalOpenCatTickets > 0)
                 {
                     foreach (var c in vm.CategoryDistribution)
@@ -213,7 +210,6 @@ namespace TMS.DataAccess.DAL
                     }
                 }
 
-                // 3. Team Workload (Admins only)
                 vm.TeamWorkloads = new List<TeamWorkloadViewModel>();
                 if (roleName == "Admin" || roleName == "Administrator")
                 {
@@ -261,7 +257,6 @@ namespace TMS.DataAccess.DAL
                     }
                 }
 
-                // 4. Recent Activity Feed
                 vm.RecentActivities = new List<ActivityFeedViewModel>();
                 string activityQuery = string.Format(@"
                     SELECT TOP 5 
