@@ -24,10 +24,7 @@ namespace TMS.WebApp.Infrastructure
                     string templatePath = templateFolder.StartsWith("~/")
                         ? HostingEnvironment.MapPath(templateFolder + "/OtpEmail.html")
                         : Path.Combine(templateFolder, "OtpEmail.html");
-                    if (File.Exists(templatePath))
-                        msg.Body = File.ReadAllText(templatePath).Replace("{otpCode}", otpCode);
-                    else
-                        msg.Body = "<h2>Your OTP Code</h2><p>Your OTP is: <strong>" + otpCode + "</strong></p>";
+                    msg.Body = File.ReadAllText(templatePath).Replace("{otpCode}", otpCode);
 
                     client.Send(msg);
                     Log.Information("OTP email sent to {Email}", toEmail);
