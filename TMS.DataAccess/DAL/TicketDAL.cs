@@ -18,14 +18,14 @@ namespace TMS.DataAccess.DAL
             this.db = DatabaseFactory.CreateDatabase();
         }
 
-        public int CreateTicket(int createdBy, string title, string description, int categoryId, int priorityId)
+        public int CreateTicket(TicketAddViewModel vm, int createdBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsTicketCreate");
             db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, createdBy);
-            db.AddInParameter(cmd, "@Title", DbType.String, title);
-            db.AddInParameter(cmd, "@Description", DbType.String, description);
-            db.AddInParameter(cmd, "@CategoryId", DbType.Int32, categoryId);
-            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, priorityId);
+            db.AddInParameter(cmd, "@Title", DbType.String, vm.Title);
+            db.AddInParameter(cmd, "@Description", DbType.String, vm.Description);
+            db.AddInParameter(cmd, "@CategoryId", DbType.Int32, vm.CategoryId);
+            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, vm.PriorityId);
             try
             {
                 using (IDataReader reader = db.ExecuteReader(cmd))
@@ -44,23 +44,29 @@ namespace TMS.DataAccess.DAL
             return 0;
         }
 
-        public List<TicketRowViewModel> GetTicketList(int userId, string roleName, string searchTerm, int? statusId, int? priorityId, int? categoryId, DateTime? dateFrom, DateTime? dateTo, string sortColumn, string sortDirection, int pageNumber, int pageSize, out int totalRows, int? assignedToUserId = null)
+        public List<TicketRowViewModel> GetTicketList(TicketListViewModel vm, int userId, string roleName)
         {
+            vm.PageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
+            vm.PageSize = vm.PageSize <= 0 ? 10 : vm.PageSize;
+            if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
+            if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
+            int? assignedToUserId = vm.UnassignedOnly ? -1 : vm.AssignedToUserId;
+
             List<TicketRowViewModel> list = new List<TicketRowViewModel>();
             DbCommand cmd = db.GetStoredProcCommand("tmsTicketGetList");
-            db.AddInParameter(cmd, "@SearchTerm", DbType.String, searchTerm ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@StatusId", DbType.Int32, statusId ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, priorityId ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@CategoryId", DbType.Int32, categoryId ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@SearchTerm", DbType.String, vm.SearchTerm ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@StatusId", DbType.Int32, vm.StatusId ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, vm.PriorityId ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@CategoryId", DbType.Int32, vm.CategoryId ?? (object)DBNull.Value);
             db.AddInParameter(cmd, "@AssignedToUserId", DbType.Int32, assignedToUserId ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@DateFrom", DbType.DateTime, dateFrom ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@DateTo", DbType.DateTime, dateTo ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@DateFrom", DbType.DateTime, vm.DateFrom ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@DateTo", DbType.DateTime, vm.DateTo ?? (object)DBNull.Value);
             db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
             db.AddInParameter(cmd, "@UserRole", DbType.String, roleName);
-            db.AddInParameter(cmd, "@SortColumn", DbType.String, sortColumn);
-            db.AddInParameter(cmd, "@SortDirection", DbType.String, sortDirection);
-            db.AddInParameter(cmd, "@PageNumber", DbType.Int32, pageNumber);
-            db.AddInParameter(cmd, "@PageSize", DbType.Int32, pageSize);
+            db.AddInParameter(cmd, "@SortColumn", DbType.String, vm.SortColumn);
+            db.AddInParameter(cmd, "@SortDirection", DbType.String, vm.SortDirection);
+            db.AddInParameter(cmd, "@PageNumber", DbType.Int32, vm.PageNumber);
+            db.AddInParameter(cmd, "@PageSize", DbType.Int32, vm.PageSize);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
             try
             {
@@ -85,7 +91,7 @@ namespace TMS.DataAccess.DAL
                         });
                     }
                 }
-                totalRows = Convert.ToInt32(db.GetParameterValue(cmd, "@TotalRows"));
+                vm.TotalRows = Convert.ToInt32(db.GetParameterValue(cmd, "@TotalRows"));
             }
             catch (Exception ex)
             {
@@ -137,16 +143,16 @@ namespace TMS.DataAccess.DAL
             return model;
         }
 
-        public void UpdateTicket(int ticketId, string title, string description, int? categoryId, int priorityId, int statusId, int? assignedToUserId, int modifiedBy)
+        public void UpdateTicket(TicketEditViewModel vm, int modifiedBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsTicketUpdate");
-            db.AddInParameter(cmd, "@TicketId", DbType.Int32, ticketId);
-            db.AddInParameter(cmd, "@Title", DbType.String, title);
-            db.AddInParameter(cmd, "@Description", DbType.String, description);
-            db.AddInParameter(cmd, "@CategoryId", DbType.Int32, categoryId ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, priorityId);
-            db.AddInParameter(cmd, "@StatusId", DbType.Int32, statusId);
-            db.AddInParameter(cmd, "@AssignedToUserId", DbType.Int32, assignedToUserId ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@TicketId", DbType.Int32, vm.TicketId);
+            db.AddInParameter(cmd, "@Title", DbType.String, vm.Title);
+            db.AddInParameter(cmd, "@Description", DbType.String, vm.Description);
+            db.AddInParameter(cmd, "@CategoryId", DbType.Int32, vm.CategoryId);
+            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, vm.PriorityId);
+            db.AddInParameter(cmd, "@StatusId", DbType.Int32, vm.StatusId);
+            db.AddInParameter(cmd, "@AssignedToUserId", DbType.Int32, vm.AssignedToUserId ?? (object)DBNull.Value);
             db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
             try
             {
@@ -159,11 +165,11 @@ namespace TMS.DataAccess.DAL
             }
         }
 
-        public void AssignTicket(int ticketId, int assignedToUserId, int modifiedBy)
+        public void AssignTicket(TicketAssignViewModel vm, int modifiedBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsTicketAssign");
-            db.AddInParameter(cmd, "@TicketId", DbType.Int32, ticketId);
-            db.AddInParameter(cmd, "@AssignedToUserId", DbType.Int32, assignedToUserId);
+            db.AddInParameter(cmd, "@TicketId", DbType.Int32, vm.TicketId);
+            db.AddInParameter(cmd, "@AssignedToUserId", DbType.Int32, vm.AssignedToUserId);
             db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
             try
             {
@@ -176,12 +182,12 @@ namespace TMS.DataAccess.DAL
             }
         }
 
-        public void UpdateTicketStatus(int ticketId, int statusId, int priorityId, int modifiedBy)
+        public void UpdateTicketStatus(TicketStatusUpdateViewModel vm, int modifiedBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsTicketUpdateStatus");
-            db.AddInParameter(cmd, "@TicketId", DbType.Int32, ticketId);
-            db.AddInParameter(cmd, "@StatusId", DbType.Int32, statusId);
-            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, priorityId);
+            db.AddInParameter(cmd, "@TicketId", DbType.Int32, vm.TicketId);
+            db.AddInParameter(cmd, "@StatusId", DbType.Int32, vm.StatusId);
+            db.AddInParameter(cmd, "@PriorityId", DbType.Int32, vm.PriorityId);
             db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
             try
             {

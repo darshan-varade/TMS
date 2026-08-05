@@ -56,16 +56,21 @@ namespace TMS.DataAccess.DAL
             return model;
         }
 
-        public List<UserRowViewModel> GetUserList(string searchTerm, int? roleId, string sortColumn, string sortDirection, int pageNumber, int pageSize, out int totalRows)
+        public List<UserRowViewModel> GetUserList(UserListViewModel vm)
         {
+            vm.PageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
+            vm.PageSize = vm.PageSize <= 0 ? 10 : vm.PageSize;
+            if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
+            if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
+
             List<UserRowViewModel> list = new List<UserRowViewModel>();
             DbCommand cmd = db.GetStoredProcCommand("tmsUserGetList");
-            db.AddInParameter(cmd, "@SearchTerm", DbType.String, searchTerm ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@RoleId", DbType.Int32, roleId ?? (object)DBNull.Value);
-            db.AddInParameter(cmd, "@SortColumn", DbType.String, sortColumn);
-            db.AddInParameter(cmd, "@SortDirection", DbType.String, sortDirection);
-            db.AddInParameter(cmd, "@PageNumber", DbType.Int32, pageNumber);
-            db.AddInParameter(cmd, "@PageSize", DbType.Int32, pageSize);
+            db.AddInParameter(cmd, "@SearchTerm", DbType.String, vm.SearchTerm ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@RoleId", DbType.Int32, vm.RoleId ?? (object)DBNull.Value);
+            db.AddInParameter(cmd, "@SortColumn", DbType.String, vm.SortColumn);
+            db.AddInParameter(cmd, "@SortDirection", DbType.String, vm.SortDirection);
+            db.AddInParameter(cmd, "@PageNumber", DbType.Int32, vm.PageNumber);
+            db.AddInParameter(cmd, "@PageSize", DbType.Int32, vm.PageSize);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
             try
             {
@@ -89,7 +94,7 @@ namespace TMS.DataAccess.DAL
                         });
                     }
                 }
-                totalRows = Convert.ToInt32(db.GetParameterValue(cmd, "@TotalRows"));
+                vm.TotalRows = Convert.ToInt32(db.GetParameterValue(cmd, "@TotalRows"));
             }
             catch (Exception ex)
             {
@@ -99,15 +104,15 @@ namespace TMS.DataAccess.DAL
             return list;
         }
 
-        public int AddUser(string fullName, string mobileNumber, string email, string passwordHash, int roleId, int departmentId, int createdBy)
+        public int AddUser(UserAddViewModel vm, int createdBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsUserAdd");
-            db.AddInParameter(cmd, "@FullName", DbType.String, fullName);
-            db.AddInParameter(cmd, "@MobileNumber", DbType.String, mobileNumber);
-            db.AddInParameter(cmd, "@Email", DbType.String, email);
-            db.AddInParameter(cmd, "@PasswordHash", DbType.String, passwordHash);
-            db.AddInParameter(cmd, "@RoleId", DbType.Int32, roleId);
-            db.AddInParameter(cmd, "@DepartmentId", DbType.Int32, departmentId);
+            db.AddInParameter(cmd, "@FullName", DbType.String, vm.FullName);
+            db.AddInParameter(cmd, "@MobileNumber", DbType.String, vm.MobileNumber);
+            db.AddInParameter(cmd, "@Email", DbType.String, vm.Email);
+            db.AddInParameter(cmd, "@PasswordHash", DbType.String, vm.PasswordHash);
+            db.AddInParameter(cmd, "@RoleId", DbType.Int32, vm.RoleId);
+            db.AddInParameter(cmd, "@DepartmentId", DbType.Int32, vm.DepartmentId);
             db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, createdBy);
             db.AddOutParameter(cmd, "@UserId", DbType.Int32, 0);
             try
@@ -122,15 +127,15 @@ namespace TMS.DataAccess.DAL
             }
         }
 
-        public void UpdateUser(int userId, string fullName, string mobileNumber, int roleId, int departmentId, bool isActive, int modifiedBy)
+        public void UpdateUser(UserEditViewModel vm, int modifiedBy)
         {
             DbCommand cmd = db.GetStoredProcCommand("tmsUserUpdate");
-            db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
-            db.AddInParameter(cmd, "@FullName", DbType.String, fullName);
-            db.AddInParameter(cmd, "@MobileNumber", DbType.String, mobileNumber);
-            db.AddInParameter(cmd, "@RoleId", DbType.Int32, roleId);
-            db.AddInParameter(cmd, "@DepartmentId", DbType.Int32, departmentId);
-            db.AddInParameter(cmd, "@IsActive", DbType.Boolean, isActive);
+            db.AddInParameter(cmd, "@UserId", DbType.Int32, vm.UserId);
+            db.AddInParameter(cmd, "@FullName", DbType.String, vm.FullName);
+            db.AddInParameter(cmd, "@MobileNumber", DbType.String, vm.MobileNumber);
+            db.AddInParameter(cmd, "@RoleId", DbType.Int32, vm.RoleId);
+            db.AddInParameter(cmd, "@DepartmentId", DbType.Int32, vm.DepartmentId);
+            db.AddInParameter(cmd, "@IsActive", DbType.Boolean, vm.IsActive);
             db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
             try
             {

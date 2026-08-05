@@ -27,6 +27,8 @@ namespace TMS.DataAccess.ViewModels
         [Required(ErrorMessage = "Department is required")]
         public int DepartmentId { get; set; }
 
+        public string PasswordHash { get; set; }
+
         public List<DropdownViewModel> Roles { get; set; }
         public List<DropdownViewModel> Departments { get; set; }
     }

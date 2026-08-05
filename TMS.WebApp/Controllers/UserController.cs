@@ -26,15 +26,7 @@ namespace TMS.WebApp.Controllers
         {
             UserDAL dal = new UserDAL();
 
-            int pageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
-            vm.PageSize = vm.PageSize <= 0 ? 10 : vm.PageSize;
-            if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
-            if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
-
-            int totalRows;
-            vm.Users = dal.GetUserList(vm.SearchTerm, vm.RoleId, vm.SortColumn, vm.SortDirection, pageNumber, vm.PageSize, out totalRows);
-            vm.TotalRows = totalRows;
-            vm.PageNumber = pageNumber;
+            vm.Users = dal.GetUserList(vm);
 
             ViewBag.Roles = new SelectList(new MasterDataDAL().GetRoles(), "Id", "Name", vm.RoleId);
             ViewBag.CurrentUserId = CurrentUserId;
@@ -46,8 +38,8 @@ namespace TMS.WebApp.Controllers
         {
             try
             {
-                int total;
-                var users = new UserDAL().GetUserList(term ?? "", null, "CreatedOn", "ASC", 1, 20, out total);
+                var searchVm = new UserListViewModel { SearchTerm = term ?? "", SortColumn = "CreatedOn", SortDirection = "ASC", PageSize = 20 };
+                var users = new UserDAL().GetUserList(searchVm);
                 var results = users.Select(u => new
                 {
                     id = u.UserId,
@@ -88,9 +80,9 @@ namespace TMS.WebApp.Controllers
 
             try
             {
-                string passwordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
+                vm.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
                 UserDAL dal = new UserDAL();
-                dal.AddUser(vm.FullName, vm.MobileNumber, vm.Email, passwordHash, vm.RoleId, vm.DepartmentId, CurrentUserId);
+                dal.AddUser(vm, CurrentUserId);
                 TempData["info"] = "User created successfully.";
                 return RedirectToAction("Index");
             }
@@ -172,7 +164,7 @@ namespace TMS.WebApp.Controllers
                 }
 
                 UserDAL dal = new UserDAL();
-                dal.UpdateUser(vm.UserId, vm.FullName, vm.MobileNumber, vm.RoleId, vm.DepartmentId, vm.IsActive, CurrentUserId);
+                dal.UpdateUser(vm, CurrentUserId);
                 TempData["info"] = "User updated successfully.";
                 return RedirectToAction("Index");
             }

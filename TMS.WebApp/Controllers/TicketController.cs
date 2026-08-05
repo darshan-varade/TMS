@@ -61,21 +61,8 @@ namespace TMS.WebApp.Controllers
         {
             TicketDAL dal = new TicketDAL();
 
-            int pageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
-            vm.PageSize = vm.PageSize <= 0 ? 10 : vm.PageSize;
-            if (string.IsNullOrEmpty(vm.SortColumn)) vm.SortColumn = "CreatedOn";
-            if (string.IsNullOrEmpty(vm.SortDirection)) vm.SortDirection = "DESC";
-
-            int? targetAssignedUser = assignedToUserId;
-            if (vm.UnassignedOnly)
-            {
-                targetAssignedUser = -1;
-            }
-
-            int totalRows;
-            vm.Tickets = dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), vm.SearchTerm, vm.StatusId, vm.PriorityId, vm.CategoryId, vm.DateFrom, vm.DateTo, vm.SortColumn, vm.SortDirection, pageNumber, vm.PageSize, out totalRows, targetAssignedUser);
-            vm.TotalRows = totalRows;
-            vm.PageNumber = pageNumber;
+            vm.AssignedToUserId = assignedToUserId;
+            vm.Tickets = dal.GetTicketList(vm, CurrentUserId, GetNormalizedRoleName());
 
             ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name");
             ViewBag.IsSupport = IsSupport;
@@ -140,7 +127,7 @@ namespace TMS.WebApp.Controllers
             try
             {
                 TicketDAL dal = new TicketDAL();
-                int ticketId = dal.CreateTicket(CurrentUserId, vm.Title, vm.Description, vm.CategoryId, vm.PriorityId);
+                int ticketId = dal.CreateTicket(vm, CurrentUserId);
 
                 if (Request.Files.Count > 0 && Request.Files[0].ContentLength > 0)
                 {
@@ -264,7 +251,9 @@ namespace TMS.WebApp.Controllers
                     }
                 }
 
-                dal.UpdateTicket(vm.TicketId, vm.Title, vm.Description, vm.CategoryId, vm.PriorityId, current.StatusId, current.AssignedToUserId, CurrentUserId);
+                vm.StatusId = current.StatusId;
+                vm.AssignedToUserId = current.AssignedToUserId;
+                dal.UpdateTicket(vm, CurrentUserId);
                 TempData["info"] = "Ticket updated successfully.";
                 return RedirectToAction("Details", new { id = vm.TicketId });
             }
@@ -315,7 +304,7 @@ namespace TMS.WebApp.Controllers
 
             try
             {
-                new TicketDAL().AssignTicket(vm.TicketId, vm.AssignedToUserId, CurrentUserId);
+                new TicketDAL().AssignTicket(vm, CurrentUserId);
                 return Json(new { success = true, message = "Ticket assigned successfully." });
             }
             catch (Exception ex)
@@ -378,7 +367,7 @@ namespace TMS.WebApp.Controllers
                     return Json(new { success = false, message = "You can only update tickets assigned to you." });
                 }
 
-                dal.UpdateTicketStatus(vm.TicketId, vm.StatusId, vm.PriorityId, CurrentUserId);
+                dal.UpdateTicketStatus(vm, CurrentUserId);
                 return Json(new { success = true, message = "Ticket status updated successfully." });
             }
             catch (Exception ex)
@@ -622,9 +611,9 @@ namespace TMS.WebApp.Controllers
                 return Json(new { count = 0 }, JsonRequestBehavior.AllowGet);
             }
             TicketDAL dal = new TicketDAL();
-            int totalRows;
-            dal.GetTicketList(CurrentUserId, GetNormalizedRoleName(), null, null, null, null, null, null, "CreatedOn", "DESC", 1, 1, out totalRows, -1);
-            return Json(new { count = totalRows }, JsonRequestBehavior.AllowGet);
+            var countVm = new TicketListViewModel { UnassignedOnly = true, PageSize = 1 };
+            dal.GetTicketList(countVm, CurrentUserId, GetNormalizedRoleName());
+            return Json(new { count = countVm.TotalRows }, JsonRequestBehavior.AllowGet);
         }
 
         private string GetContentType(string fileName)
