@@ -50,7 +50,7 @@ namespace TMS.WebApp
                     Log.Logger = fileConfig
                         .WriteTo.MSSqlServer(
                             ConfigurationManager.ConnectionStrings["constr"].ConnectionString,
-                            sinkOptions: new MSSqlServerSinkOptions { TableName = "LogEvents", AutoCreateSqlTable = true })
+                            sinkOptions: new MSSqlServerSinkOptions { TableName = "tmsLogEvents", AutoCreateSqlTable = true })
                         .CreateLogger();
                 }
                 catch

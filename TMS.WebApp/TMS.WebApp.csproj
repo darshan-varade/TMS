@@ -178,9 +178,7 @@
     <Content Include="PageScripts\AppShared.js" />
     <Content Include="PageScripts\TicketListScript.js" />
     <Content Include="PageScripts\TicketDetailScript.js" />
-    <Content Include="PageScripts\TicketAddScript.js" />
     <Content Include="PageScripts\UserListScript.js" />
-    <Content Include="PageScripts\UserAddScript.js" />
     <Content Include="PageScripts\DashboardScript.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />

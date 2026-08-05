@@ -248,6 +248,8 @@
                 </div>
             </div>
         </div>
+
+        <script id="dashboardChartData" type="application/json">@Html.Raw(Json.Encode(new { status = Model.StatusChart, priority = Model.PriorityChart }))</script>
     }
     else if (isSupport)
     {
@@ -435,70 +437,5 @@
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var statusCanvas = document.getElementById('statusChart');
-            var priorityCanvas = document.getElementById('priorityChart');
-
-            if (statusCanvas) {
-                var statusCtx = statusCanvas.getContext('2d');
-                new Chart(statusCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: [@Html.Raw(string.Join(",", Model.StatusChart.Select(s => $"'{s.Label}'")))],
-                        datasets: [{
-                            data: [@string.Join(",", Model.StatusChart.Select(s => s.Value.ToString()))],
-                            backgroundColor: ['#6366F1', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#64748B'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        cutout: '72%'
-                    }
-                });
-            }
-
-            if (priorityCanvas) {
-                var priorityCtx = priorityCanvas.getContext('2d');
-                @if (isAdmin) {
-                    <text>
-                    new Chart(priorityCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: [@Html.Raw(string.Join(",", Model.PriorityChart.Select(s => $"'{s.Label}'")))],
-                            datasets: [{
-                                data: [@string.Join(",", Model.PriorityChart.Select(s => s.Value.ToString()))],
-                                backgroundColor: '#4f46e5',
-                                borderRadius: 4,
-                                maxBarThickness: 32
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                x: { 
-                                    grid: { display: false },
-                                    ticks: { color: '#888', font: { size: 11 } }
-                                },
-                                y: { 
-                                    grid: { color: 'rgba(0,0,0,0.05)' },
-                                    ticks: { stepSize: 1, color: '#888' } 
-                                }
-                            }
-                        }
-                    });
-                    </text>
-                }
-            }
-        });
-    </script>
+    <script src="~/PageScripts/DashboardScript.js?v=@DateTime.Now.Ticks"></script>
 }
