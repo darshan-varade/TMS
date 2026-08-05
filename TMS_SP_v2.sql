@@ -571,6 +571,7 @@ AS
 	Date   			Modified By   		Purpose of Modification
 1	31Jul2026		Darshan Varade		Get filtered, paginated ticket list
 2	3Aug2026		Darshan Varade		Add unassigned ticket filter (@AssignedToUserId = -1)
+3	5Aug2026		Darshan Varade		Sort Status/Priority by their id value, not name
 ***********************************************************************************************
 tmsTicketGetList
 
@@ -578,7 +579,7 @@ tmsTicketGetList
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		SELECT t.ticketId, t.ticketNumber, t.title, t.assignedToUserId, t.CreatedBy AS createdByUserId,
+		SELECT t.ticketId, t.priorityId, t.statusId, t.ticketNumber, t.title, t.assignedToUserId, t.CreatedBy AS createdByUserId,
 			c.categoryName, p.priorityName, s.statusName,
 			u.fullName AS createdByName, assignee.fullName AS assignedToName,
 			t.CreatedOn,
@@ -610,8 +611,8 @@ BEGIN
 		SET @orderCol = CASE @SortColumn
 			WHEN 'TicketNumber' THEN 'ticketNumber'
 			WHEN 'Title' THEN 'title'
-			WHEN 'StatusName' THEN 'statusName'
-			WHEN 'PriorityName' THEN 'priorityName'
+			WHEN 'StatusName' THEN 'statusId'
+			WHEN 'PriorityName' THEN 'priorityId'
 			ELSE 'CreatedOn'
 		END;
 

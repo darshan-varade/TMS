@@ -25,10 +25,6 @@
                 <th>Created By</th>
             }
             <th>Assigned To</th>
-            @if (!isEmployee)
-            {
-                <th class="text-center">Messages</th>
-            }
             <th class="sortable" data-column="CreatedOn">Created <span class="sort-icon"></span></th>
             <th class="pe-3 text-end">Actions</th>
         </tr>
@@ -69,10 +65,6 @@
                             <span class="text-muted fw-medium">@(t.AssignedToName ?? "-")</span>
                         }
                     </td>
-                    @if (!isEmployee)
-                    {
-                        <td class="text-center" data-label="Messages"><span class="badge bg-light">@t.ConversationCount</span></td>
-                    }
                     <td class="text-secondary" data-label="Created" style="font-size: 0.9rem;">@t.CreatedOn.ToString("dd MMM yyyy")</td>
                     <td class="pe-3 text-end td-actions" style="white-space: nowrap;">
                         <a href="@Url.Action("Details", new { id = t.TicketId })" class="btn btn-sm btn-outline-primary py-1 px-2" title="View Details"><i class="bi bi-eye"></i></a>
@@ -86,7 +78,7 @@
         }
         else
         {
-            <tr><td colspan="@(isEmployee ? 7 : 10)" class="text-center text-muted py-4">No tickets found.</td></tr>
+            <tr><td colspan="@(isEmployee ? 7 : 9)" class="text-center text-muted py-4">No tickets found.</td></tr>
         }
     </tbody>
 </table>
