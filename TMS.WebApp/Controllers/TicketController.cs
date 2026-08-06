@@ -472,7 +472,7 @@ namespace TMS.WebApp.Controllers
                 return Json(new { success = success, message = message });
             }
 
-            TempData["info"] = message;
+            TempData["error"] = message;
             return RedirectToAction("Index");
         }
 

@@ -1025,6 +1025,7 @@ AS
 	Date   			Modified By   		Purpose of Modification
 1	31Jul2026		Darshan Varade		Get filtered, paginated user list
 2	1Aug2026		Darshan Varade		Add filters and search
+3	6Aug2026		Darshan Varade		Add IsActive check
 ***********************************************************************************************
 tmsUserGetList
 
@@ -1040,7 +1041,8 @@ BEGIN
 		INNER JOIN tmsCredential c ON u.userId = c.userId
 		INNER JOIN tmsRole r ON c.roleId = r.roleId
 		INNER JOIN tmsDepartment d ON u.departmentId = d.departmentId
-		WHERE (@SearchTerm IS NULL OR u.fullName LIKE '%' + @SearchTerm + '%')
+		WHERE u.IsActive = 1
+			AND (@SearchTerm IS NULL OR u.fullName LIKE '%' + @SearchTerm + '%')
 			AND (@RoleId IS NULL OR c.roleId = @RoleId);
 
 		SELECT @TotalRows = COUNT(1) FROM #userList;
@@ -1328,6 +1330,7 @@ AS
 ***********************************************************************************************
 	Date   			Modified By   		Purpose of Modification
 1	31Jul2026		Darshan Varade		Get user by id
+2	6Aug2026		Darshan Varade		Add IsActive check
 ***********************************************************************************************
 tmsUserGetById
 
@@ -1342,7 +1345,7 @@ BEGIN
 		INNER JOIN tmsCredential c ON u.userId = c.userId
 		INNER JOIN tmsRole r ON c.roleId = r.roleId
 		INNER JOIN tmsDepartment d ON u.departmentId = d.departmentId
-		WHERE u.userId = @UserId;
+		WHERE u.userId = @UserId AND u.IsActive = 1;
 	END TRY
 	BEGIN CATCH
 		THROW;

@@ -213,9 +213,13 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Dashboard\Index.cshtml" />
     <Content Include="Views\Ticket\Index.cshtml" />
+    <Content Include="Views\Ticket\_TicketListPartial.cshtml" />
+    <Content Include="Views\Ticket\_AssignPartial.cshtml" />
+    <Content Include="Views\Ticket\_UpdateStatusPartial.cshtml" />
     <Content Include="Views\Ticket\Create.cshtml" />
     <Content Include="Views\Ticket\Details.cshtml" />
     <Content Include="Views\User\Index.cshtml" />
+    <Content Include="Views\User\_UserListPartial.cshtml" />
     <Content Include="Views\User\Create.cshtml" />
     <Content Include="Views\User\Edit.cshtml" />
     <Content Include="Views\Profile\Index.cshtml" />

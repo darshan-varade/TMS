@@ -268,7 +268,7 @@ $(function () {
         showConfirm('Delete User', 'Are you sure you want to delete "' + name + '"? They will be deactivated and unable to log in. Their history will be preserved.', 'Delete', function () {
             $.post('/User/Delete', { userId: userId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
                 .done(function (r) {
-                    if (r.success) { showToast(r.message, 'success'); setTimeout(function () { FetchData(); }, 800); }
+                    if (r.success) { showToast(r.message, 'error'); setTimeout(function () { FetchData(); }, 800); }
                     else { showToast(r.error, 'error'); }
                 })
                 .fail(function () { showToast('Error deleting user', 'error'); });

@@ -239,7 +239,7 @@ $(function () {
             $.post('/Ticket/Delete', { id: ticketId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
                 .done(function (r) {
                     if (r.success) {
-                        showToast(r.message, 'success');
+                        showToast(r.message, 'error');
                         setTimeout(function () { FetchData(); }, 800);
                     } else {
                         showToast(r.message || 'Error deleting ticket', 'error');
