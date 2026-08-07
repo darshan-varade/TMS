@@ -1,7 +1,6 @@
 @model TMS.DataAccess.ViewModels.UserListViewModel
 @{
     int currentUserId = (int)ViewBag.CurrentUserId;
-    var roles = (SelectList)ViewBag.Roles;
 }
 
 <input type="hidden" id="TotalRows" value="@Model.TotalRows" />
@@ -37,9 +36,9 @@
                         {
                             <div class="cell-value">
                                 <select class="form-select form-select-sm change-role" data-userid="@u.UserId" data-orig="@u.RoleId" title="Change role">
-                                    @foreach (var r in roles)
+                                    @foreach (var r in Model.Roles)
                                     {
-                                        <option value="@r.Value" @(u.RoleId.ToString() == r.Value ? "selected" : "")>@r.Text</option>
+                                        <option value="@r.Id" @(u.RoleId == r.Id ? "selected" : "")>@r.Name</option>
                                     }
                                 </select>
                             </div>

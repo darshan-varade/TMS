@@ -4,7 +4,6 @@
     bool isSupport = (bool)ViewBag.IsSupport;
     bool isEmployee = (bool)ViewBag.IsEmployee;
     int currentUserId = (int)ViewBag.CurrentUserId;
-    var supportUsers = (SelectList)ViewBag.SupportUsers;
 }
 
 <input type="hidden" id="TotalRows" value="@Model.TotalRows" />
@@ -53,9 +52,9 @@
                             <div class="cell-value">
                                 <select class="form-select form-select-sm assign-user" data-ticketid="@t.TicketId" data-orig="@(t.AssignedToUserId.HasValue ? t.AssignedToUserId.Value.ToString() : "")" title="Assign support executive">
                                     <option value="">-- Unassigned --</option>
-                                    @foreach (var u in supportUsers)
+                                    @foreach (var u in Model.SupportUsers)
                                     {
-                                        <option value="@u.Value" @(t.AssignedToUserId.HasValue && t.AssignedToUserId.Value.ToString() == u.Value ? "selected" : "")>@u.Text</option>
+                                        <option value="@u.Id" @(t.AssignedToUserId.HasValue && t.AssignedToUserId.Value == u.Id ? "selected" : "")>@u.Name</option>
                                     }
                                 </select>
                             </div>

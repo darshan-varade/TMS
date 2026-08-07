@@ -419,18 +419,18 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Category</label>
                                     <select name="CategoryId" class="form-select">
-                                        @foreach (var c in (SelectList)ViewBag.Categories)
+                                        @foreach (var c in Model.Categories)
                                         {
-                                            <option value="@c.Value" @(c.Selected ? "selected" : "")>@c.Text</option>
+                                            <option value="@c.Id" @(c.Id == Model.CategoryId ? "selected" : "")>@c.Name</option>
                                         }
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Priority</label>
                                     <select name="PriorityId" class="form-select">
-                                        @foreach (var p in (SelectList)ViewBag.Priorities)
+                                        @foreach (var p in Model.Priorities)
                                         {
-                                            <option value="@p.Value" @(p.Selected ? "selected" : "")>@p.Text</option>
+                                            <option value="@p.Id" @(p.Id == Model.PriorityId ? "selected" : "")>@p.Name</option>
                                         }
                                     </select>
                                 </div>

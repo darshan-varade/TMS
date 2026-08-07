@@ -80,7 +80,7 @@
 
                 <div class="mb-3">
                     @Html.LabelFor(m => m.DepartmentId, new { @class = "form-label" })
-                    @Html.DropDownListFor(m => m.DepartmentId, (SelectList)ViewBag.Departments, "-- Select Department --", new { @class = "form-select" })
+                    @Html.DropDownListFor(m => m.DepartmentId, new SelectList(Model.Departments, "Id", "Name"), "-- Select Department --", new { @class = "form-select" })
                     @Html.ValidationMessageFor(m => m.DepartmentId, "", new { @class = "text-danger", style = "font-size: 0.8rem;" })
                 </div>
 

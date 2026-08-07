@@ -25,5 +25,8 @@ namespace TMS.DataAccess.ViewModels
         public List<CommentViewModel> Comments { get; set; }
         public List<ActivityViewModel> Activities { get; set; }
         public List<AttachmentViewModel> Attachments { get; set; }
+
+        public List<DropdownViewModel> Categories { get; set; }
+        public List<DropdownViewModel> Priorities { get; set; }
     }
 }

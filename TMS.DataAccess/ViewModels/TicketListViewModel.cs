@@ -20,6 +20,11 @@ namespace TMS.DataAccess.ViewModels
         public string SortDirection { get; set; } = "DESC";
         public bool UnassignedOnly { get; set; }
         public int? AssignedToUserId { get; set; }
+
+        public List<DropdownViewModel> Statuses { get; set; }
+        public List<DropdownViewModel> Priorities { get; set; }
+        public List<DropdownViewModel> Categories { get; set; }
+        public List<DropdownViewModel> SupportUsers { get; set; }
     }
 
     public class TicketRowViewModel

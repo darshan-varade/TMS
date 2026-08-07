@@ -14,6 +14,8 @@ namespace TMS.DataAccess.ViewModels
 
         public string SortColumn { get; set; } = "CreatedOn";
         public string SortDirection { get; set; } = "DESC";
+
+        public List<DropdownViewModel> Roles { get; set; }
     }
 
     public class UserRowViewModel

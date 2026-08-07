@@ -43,15 +43,15 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label mb-1 small text-secondary fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Status</label>
-                    @Html.DropDownListFor(m => m.StatusId, (SelectList)ViewBag.Statuses, "All Statuses", new { @class = "form-select" })
+                    @Html.DropDownListFor(m => m.StatusId, new SelectList(Model.Statuses, "Id", "Name"), "All Statuses", new { @class = "form-select" })
                 </div>
                 <div class="col-md-2">
                     <label class="form-label mb-1 small text-secondary fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Priority</label>
-                    @Html.DropDownListFor(m => m.PriorityId, (SelectList)ViewBag.Priorities, "All Priorities", new { @class = "form-select" })
+                    @Html.DropDownListFor(m => m.PriorityId, new SelectList(Model.Priorities, "Id", "Name"), "All Priorities", new { @class = "form-select" })
                 </div>
                 <div class="col-md-4">
                     <label class="form-label mb-1 small text-secondary fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Category</label>
-                    @Html.DropDownListFor(m => m.CategoryId, (SelectList)ViewBag.Categories, "All Categories", new { @class = "form-select" })
+                    @Html.DropDownListFor(m => m.CategoryId, new SelectList(Model.Categories, "Id", "Name"), "All Categories", new { @class = "form-select" })
                 </div>
                 <div class="col-md-3">
                     <label class="form-label mb-1 small text-secondary fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Date From</label>

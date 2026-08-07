@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label mb-1 small text-muted">Role</label>
-                    @Html.DropDownListFor(m => m.RoleId, (SelectList)ViewBag.Roles, "All Roles", new { @class = "form-select" })
+                    @Html.DropDownListFor(m => m.RoleId, new SelectList(Model.Roles, "Id", "Name"), "All Roles", new { @class = "form-select" })
                 </div>
                 <div class="col-md-3 d-flex align-items-end gap-2">
                     <button type="button" id="searchBtn" class="btn btn-outline-primary"><i class="bi bi-search"></i> Filter</button>

@@ -27,10 +27,6 @@ namespace TMS.WebApp.Controllers
         private ActionResult BuildShell(bool myAssignedOnly, bool unassignedOnly = false)
         {
             MasterDataDAL master = new MasterDataDAL();
-            ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name");
-            ViewBag.Priorities = new SelectList(master.GetPriorities(), "Id", "Name");
-            ViewBag.Categories = new SelectList(master.GetCategories(), "Id", "Name");
-            ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name");
             ViewBag.IsSupport = IsSupport;
             ViewBag.IsAdmin = IsAdmin;
             ViewBag.IsEmployee = IsEmployee;
@@ -38,7 +34,16 @@ namespace TMS.WebApp.Controllers
             ViewBag.MyAssignedOnly = myAssignedOnly;
             ViewBag.UnassignedOnly = unassignedOnly;
 
-            return View("Index", new TicketListViewModel { UnassignedOnly = unassignedOnly });
+            var vm = new TicketListViewModel
+            {
+                UnassignedOnly = unassignedOnly,
+                Statuses = master.GetStatuses(),
+                Priorities = master.GetPriorities(),
+                Categories = master.GetCategories(),
+                SupportUsers = new UserDAL().GetSupportUsers()
+            };
+
+            return View("Index", vm);
         }
 
         [HttpPost]
@@ -63,8 +68,8 @@ namespace TMS.WebApp.Controllers
 
             vm.AssignedToUserId = assignedToUserId;
             vm.Tickets = dal.GetTicketList(vm, CurrentUserId, GetNormalizedRoleName());
+            vm.SupportUsers = new UserDAL().GetSupportUsers();
 
-            ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name");
             ViewBag.IsSupport = IsSupport;
             ViewBag.IsAdmin = IsAdmin;
             ViewBag.IsEmployee = IsEmployee;
@@ -202,13 +207,11 @@ namespace TMS.WebApp.Controllers
                 CreatedByUserId = ticket.CreatedBy,
                 Comments = comments,
                 Activities = IsEmployee ? null : dal.GetActivities(id),
-                Attachments = mainAttachments
+                Attachments = mainAttachments,
+                Categories = master.GetCategories(),
+                Priorities = master.GetPriorities()
             };
 
-            ViewBag.Statuses = new SelectList(master.GetStatuses(), "Id", "Name", ticket.StatusId);
-            ViewBag.Priorities = new SelectList(master.GetPriorities(), "Id", "Name", ticket.PriorityId);
-            ViewBag.Categories = new SelectList(master.GetCategories(), "Id", "Name", ticket.CategoryId);
-            ViewBag.SupportUsers = new SelectList(new UserDAL().GetSupportUsers(), "Id", "Name", ticket.AssignedToUserId);
             ViewBag.CurrentUserId = CurrentUserId;
             ViewBag.IsAdmin = IsAdmin;
             ViewBag.IsSupport = IsSupport;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace TMS.DataAccess.ViewModels
 {
@@ -31,5 +32,7 @@ namespace TMS.DataAccess.ViewModels
         public string OtpEmail { get; set; }
         public string OtpCode { get; set; }
         public string SignupStep { get; set; }
+
+        public List<DropdownViewModel> Departments { get; set; }
     }
 }

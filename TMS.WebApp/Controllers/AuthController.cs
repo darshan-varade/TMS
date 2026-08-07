@@ -93,9 +93,8 @@ namespace TMS.WebApp.Controllers
             if (User.Identity.IsAuthenticated)
                 return RedirectToAction("Index", "Home");
 
-            MasterDataDAL dal = new MasterDataDAL();
             var vm = new SignupViewModel();
-            ViewBag.Departments = new SelectList(dal.GetDepartments(), "Id", "Name");
+            vm.Departments = new MasterDataDAL().GetDepartments();
             return View(vm);
         }
 
@@ -116,7 +115,7 @@ namespace TMS.WebApp.Controllers
                 if (string.IsNullOrEmpty(vm.OtpCode) || vm.OtpCode.Length != 6)
                 {
                     ModelState.AddModelError("OtpCode", "Enter the 6-digit code.");
-                    ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                    vm.Departments = new MasterDataDAL().GetDepartments();
                     return View(vm);
                 }
 
@@ -126,7 +125,7 @@ namespace TMS.WebApp.Controllers
                     if (otpId == null)
                     {
                         ModelState.AddModelError("OtpCode", "Invalid or expired code.");
-                        ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                        vm.Departments = new MasterDataDAL().GetDepartments();
                         return View(vm);
                     }
 
@@ -140,14 +139,14 @@ namespace TMS.WebApp.Controllers
                 {
                     Serilog.Log.Error(ex, "Error in Signup OTP verification");
                     ModelState.AddModelError("", "An error occurred. Please try again.");
-                    ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                    vm.Departments = new MasterDataDAL().GetDepartments();
                     return View(vm);
                 }
             }
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                vm.Departments = new MasterDataDAL().GetDepartments();
                 return View(vm);
             }
 
@@ -156,7 +155,7 @@ namespace TMS.WebApp.Controllers
                 if (dal.UserCheckEmail(vm.Email))
                 {
                     ModelState.AddModelError("Email", "This email is already registered.");
-                    ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                    vm.Departments = new MasterDataDAL().GetDepartments();
                     return View(vm);
                 }
 
@@ -173,7 +172,7 @@ namespace TMS.WebApp.Controllers
                 vm.Password = null;
                 vm.ConfirmPassword = null;
                 ModelState.Clear();
-                ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                vm.Departments = new MasterDataDAL().GetDepartments();
 
                 return View(vm);
             }
@@ -181,7 +180,7 @@ namespace TMS.WebApp.Controllers
             {
                 Serilog.Log.Error(ex, "Error in Signup POST");
                 ModelState.AddModelError("", "An error occurred. Please try again.");
-                ViewBag.Departments = new SelectList(new MasterDataDAL().GetDepartments(), "Id", "Name");
+                vm.Departments = new MasterDataDAL().GetDepartments();
                 return View(vm);
             }
         }

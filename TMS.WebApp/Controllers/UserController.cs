@@ -13,10 +13,9 @@ namespace TMS.WebApp.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = "Users";
-            MasterDataDAL master = new MasterDataDAL();
-            ViewBag.Roles = new SelectList(master.GetRoles(), "Id", "Name");
             ViewBag.CurrentUserId = CurrentUserId;
-            return View(new UserListViewModel());
+            var vm = new UserListViewModel { Roles = new MasterDataDAL().GetRoles() };
+            return View(vm);
         }
 
         [HttpPost]
@@ -27,8 +26,8 @@ namespace TMS.WebApp.Controllers
             UserDAL dal = new UserDAL();
 
             vm.Users = dal.GetUserList(vm);
+            vm.Roles = new MasterDataDAL().GetRoles();
 
-            ViewBag.Roles = new SelectList(new MasterDataDAL().GetRoles(), "Id", "Name", vm.RoleId);
             ViewBag.CurrentUserId = CurrentUserId;
             return PartialView("_UserListPartial", vm);
         }
